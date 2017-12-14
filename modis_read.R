@@ -1,5 +1,5 @@
 ############### SESYNC Research Support: Hurricane Management ########## 
-## Help in processing data for the workshop group.
+## Help in processing modis data for the workshop group.
 ##
 ##
 ## DATE CREATED: 12/13/2017
@@ -59,28 +59,35 @@ load_obj <- function(f){
 
 ###### Functions used in this script
 
-#Mosaic related on NEX
-script_path <- "/nfs/bparmentier-data/Data/projects/managing_hurricanes/scripts"
-raster_processing_functions <- "raster_processing_functions_b.R" #Functions used to mosaic predicted tiles
+#Benoit setup
+#script_path <- "/nfs/bparmentier-data/Data/projects/managing_hurricanes/scripts"
+#teamhurricane-data setup
+script_path <- "/nfs/teamhurricane-data/Habitat Group/Geospatial_Data/scripts"
+
+raster_processing_functions <- "raster_processing_functions_12142017.R" #Functions used to mosaic predicted tiles
 source(file.path(script_path,raster_processing_functions)) #source all functions used in this script 
 
 ############################################################################
 #####  Parameters and argument set up ###########
 
 #ARGS 1
-#in_dir <- "/nfs/teamhurricane-data/Habitat Group/Geospatial_Data/Raw_Data/MODIS"
-in_dir <- "/nfs/bparmentier-data/Data/projects/managing_hurricanes/data"
-out_dir <- "/nfs/bparmentier-data/Data/projects/managing_hurricanes/outputs"
+#Set up teamhurricane-data
+in_dir <- "/nfs/teamhurricane-data/Habitat Group/Geospatial_Data/Raw_Data/MODIS"
+out_dir <- "/nfs/teamhurricane-data/Habitat Group/Geospatial_Data/outputs"
+
+## Set up Benoit
+#in_dir <- "/nfs/bparmentier-data/Data/projects/managing_hurricanes/data"
+#out_dir <- "/nfs/bparmentier-data/Data/projects/managing_hurricanes/outputs"
 
 hdf_file <-"test.hdf"
 
 #NA_flag <- -999999
-file_format <-
+file_format <- ".tif"
 scaling_factor <- 0.0001 #MODIFY THE SCALING FACTOR - FOR NORMALIZED DATA SHOULD BE 10,000 AT LEAST
 #ARGS 7
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 8
-out_suffix <-"modis_processing_12132017" #output suffix for the files and ouptut folder #param 12
+out_suffix <-"modis_processing_12142017" #output suffix for the files and ouptut folder #param 12
 num_cores <- 2 # number of cores
 
 ################# START SCRIPT ###############################
@@ -141,18 +148,42 @@ modis_layer_str2 <- unlist(strsplit(modis_subdataset[5],"\""))[3] #Get day VI QC
 subdataset <- modis_layer_str1
 modis_subset_layer_Day <- paste("HDF4_EOS:EOS_GRID:",hdf_file,subdataset,sep="")
 
-r <-readGDAL(modis_subset_layer_Day)
-r  <-raster(r)
+r <- readGDAL(modis_subset_layer_Day) #read specific dataset in hdf file and make SpatialGridDataFrame
 
-plot(r)
+r  <-raster(r) #convert to raser object
+
+plot(r,main="NDVI ~250m")
 r #print properties
 res(r) #spatial resolution
-NAvalue(r)
-dataType(r)
+NAvalue(r) #find the NA flag value
+dataType(r) #find the dataType
 
 #### Example using function provided:
 
 r2 <- import_modis_layer_fun(hdf_file,subdataset,NA_flag,out_rast_name="test.tif",memory=TRUE)
 r2  
 
-######################### END OF SCRIPT ###################
+raster_name <- gsub(extension(hdf_file),file_format,basename(hdf_file)) #output file name
+
+####Write out the imported layer
+writeRaster(r2,
+            file.path(out_dir,raster_name),
+            overwrite=TRUE)
+
+
+# for more control, you can set dataType and/or compress the files
+data_type_str <- "FLT4S"
+NA_flag_val <- NAvalue(r2)
+
+writeRaster(r2,
+            file.path(out_dir,raster_name),
+            overwrite=TRUE,
+            NAflag=NA_flag_val,
+            datatype=data_type_str,
+            options=c("COMPRESS=LZW"))
+
+#### Next steps to consider:
+## Use the name from MODIS file because it contains information on tile location, date and product type
+## Use QC index to screen for low value pixels
+
+######################### END OF SCRIPT ##############################
