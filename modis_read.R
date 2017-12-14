@@ -74,6 +74,8 @@ out_dir <- "/nfs/bparmentier-data/Data/projects/managing_hurricanes/outputs"
 
 hdf_file <-"test.hdf"
 
+#NA_flag <- -999999
+file_format <-
 scaling_factor <- 0.0001 #MODIFY THE SCALING FACTOR - FOR NORMALIZED DATA SHOULD BE 10,000 AT LEAST
 #ARGS 7
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
@@ -143,9 +145,14 @@ r <-readGDAL(modis_subset_layer_Day)
 r  <-raster(r)
 
 plot(r)
+r #print properties
+res(r) #spatial resolution
+NAvalue(r)
+dataType(r)
 
 #### Example using function provided:
 
-
+r2 <- import_modis_layer_fun(hdf_file,subdataset,NA_flag,out_rast_name="test.tif",memory=TRUE)
+r2  
 
 ######################### END OF SCRIPT ###################
