@@ -1,15 +1,16 @@
-############### SESYNC Research Support: Animals Trade ########## 
-## Functions used in the processing of data from google search on species for the animals-trade project at SESYNC.
-## 
+############### SESYNC Research Support: Hurricane Management ########## 
+## Help in processing data for the workshop group.
+##
+##
 ## DATE CREATED: 12/13/2017
-## DATE MODIFIED: 12/11/2017
+## DATE MODIFIED: 12/14/2017
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Hurricane Management
 ## ISSUE: 
 ## TO DO:
 ##
-## COMMIT: documenting and testing function to import data sent by google
+## COMMIT: 
 ##
 ## Links to investigate:
 
@@ -58,21 +59,22 @@ load_obj <- function(f){
 
 ###### Functions used in this script
 
-functions_time_series_analyses_script <- "time_series_functions_08012017.R" #PARAM 1
-functions_processing_data_script <- "processing_data_google_search_time_series_functions_12112017.R" #PARAM 1
-functions_time_series_cycles_analyses_script <- "time_series_cycles_analyses_functions_11202017.R" #PARAM 1
+#Mosaic related on NEX
+script_path <- "/nfs/bparmentier-data/Data/projects/managing_hurricanes/scripts"
+raster_processing_functions <- "raster_processing_functions_b.R" #Functions used to mosaic predicted tiles
+source(file.path(script_path,raster_processing_functions)) #source all functions used in this script 
 
 ############################################################################
 #####  Parameters and argument set up ###########
 
 #ARGS 1
-in_dir <- "/nfs/teamhurricane-data/Habitat Group/Geospatial_Data/Raw_Data/MODIS"
+#in_dir <- "/nfs/teamhurricane-data/Habitat Group/Geospatial_Data/Raw_Data/MODIS"
+in_dir <- "/nfs/bparmentier-data/Data/projects/managing_hurricanes/data"
+out_dir <- "/nfs/bparmentier-data/Data/projects/managing_hurricanes/outputs"
 
 hdf_file <-"test.hdf"
 
-scaling_factor <- 100 #MODIFY THE SCALING FACTOR - FOR NORMALIZED DATA SHOULD BE 10,000 AT LEAST
-#scaling_factor <- 1000 
-out_dir <- "/nfs/bparmentier-data/Data/projects/animals_trade/outputs"
+scaling_factor <- 0.0001 #MODIFY THE SCALING FACTOR - FOR NORMALIZED DATA SHOULD BE 10,000 AT LEAST
 #ARGS 7
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 8
@@ -84,7 +86,6 @@ num_cores <- 2 # number of cores
 ######### PART 0: Set up the output dir ################
 
 options(scipen=999)
-
 
 if(is.null(out_dir)){
   out_dir <- in_dir #output will be created in the input dir
@@ -106,13 +107,14 @@ if(create_out_dir_param==TRUE){
 #Create output directory
 
 
-hdf_file <- file.path(in_dir,hdf_file)
-GDALinfo_hdf <- GDALinfo(hdf_file,returnScaleOffset = F)
+hdf_file <- file.path(in_dir,hdf_file) #associate file path to input
+GDALinfo_hdf <- GDALinfo(hdf_file,returnScaleOffset = F) #use GDAL info utility
 
-str(GDALinfo_hdf)
+str(GDALinfo_hdf) ## Class GDLobj
 modis_subdataset <- attributes(GDALinfo_hdf)$subdsmdata
 print(modis_subdataset)
 
+### Generate a data.frame from scientific datasets
 hdf_df <- (strsplit(modis_subdataset,":"))
 #length(modis_subdataset)
 hdf_df <- as.data.frame(do.call(rbind,hdf_df),stringsAsFactors=F)
@@ -126,8 +128,8 @@ View(hdf_df)
 
 write.table(hdf_df,"hdf_subdataset.txt",sep=",")
 
-modis_subset_layer_Day <- paste("HDF4_EOS:EOS_GRID:",
-                                hdf_file,subdataset,sep="")
+#modis_subset_layer_Day <- paste("HDF4_EOS:EOS_GRID:",
+#                                hdf_file,subdataset,sep="")
 
 #NDVI variable
 modis_layer_str1 <- unlist(strsplit(modis_subdataset[1],"\""))[3] #Get day NDVI layer
@@ -142,4 +144,8 @@ r  <-raster(r)
 
 plot(r)
 
-####### END OF SCRIPT ###################
+#### Example using function provided:
+
+
+
+######################### END OF SCRIPT ###################
