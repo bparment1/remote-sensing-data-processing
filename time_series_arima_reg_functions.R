@@ -1,16 +1,15 @@
-####################################    Space Time Analyses Project   #######################################
-############################  Yucatan case study: SAR, SARMA etc -PART 2  #######################################
-#This script functions to produce predictions for the dates following the Hurricane Dean event.       
-#The script uses spatial regression with weight matrix to predict NDVI values in the MOORE EDGY region. 
-#Temporal predictions use OLS with the image of the previous time step rather than ARIMA.
+####################################    Time Series Analyses  #######################################
+############################  ARIMA and other time series methods  #######################################
+#This script functions to produce ARIMA predictions for raster time series stack.       
 #AUTHORS: Benoit Parmentier                                             
 #DATE CREATED: 03/09/2014 
-#DATE MODIFIED: 06/05/2018
+#DATE MODIFIED: 06/08/2018
 #Version: 2
 #PROJECT: GLP Conference Berlin,YUCATAN CASE STUDY with Marco Millones            
 #PROJECT: Workshop for William and Mary: an intro to spatial regression with R 
 #PROJECT: Geocomputation and AAG 2015
-#PROJECT: Space beats time paper
+#PROJECT: Space beats time project
+#PROJECT: SESYNC Research support
 
 #TO DO:
 # modify the rasterize_df_fun function to allow ref image
@@ -22,15 +21,6 @@
 
 #This script currently contains 7 functions:
 
-#[1] "calc_ac_stat_fun" : compute MAE for predictions wiht or without regions/zones
-#[2] "create_dir_fun"   : create an output directory                    
-#[3] "create_sp_poly_spatial_reg" : create a list of weights and polygon file for spatial regression
-#[4] "create_uniform_mask_fun" : harmonize NA values given input layers with different valid values            
-#[5] "load_obj" : load R object                          
-#[6] "predict_spat_reg_fun" : function to perform spatial regresssion prediction
-#[7] "predict_temp_reg_fun : function to preform temporal  predictions       
-#[8] "rasterize_df_fun" : create raster from textfile with location information
-#
 #Add arima functions
 #[9] "convert_arima_pred_to_raster"         
 #[10] "extract_arima_mod_info"              
@@ -282,14 +272,14 @@ extract_arima_mod_info <- function(i,list_param){
 #    }
 
 
-#Predict using the previous date and OLS
+#Predict using time model
 predict_temp_reg_fun <-function(i,list_param){
   #####
   #This function gnerates a prediction based on time dimension and neighbour.
-  ##Inputs are raster stack with different options for regression estimators: OLS or ARIMA
+  ##Inputs are raster stack with different options for regression estimators:  ARIMA
   #####
   ## Date created: 03/09/2014
-  ## Date modified: 06/05/2018
+  ## Date modified: 06/08/2018
   # Authors: Benoit Parmentier
   #
   #INPUTS:
@@ -353,67 +343,7 @@ predict_temp_reg_fun <-function(i,list_param){
   #r_ref_s <- subset(r_ref_s,i)
   #out_dir and out_suffix set earlier
   
-  if(estimation_method=="ols"){
-    
-    #this should be a function of its own!!!
-    if(!is.null(r_clip)){
-      #r_stack2<-r_stack #this is should not be in memoor!!!
-      r_stack <- crop(r_stack,r_clip)
-      r_ref_s <- crop(r_ref_s,r_clip)
-    }
-    
-    n_pred <- i+1 #if step 20 then prediction is step 21!
-    #n_start <- c(time_step) 
-    n_start <- i
-    #n_end   <- c(time_step)+n_pred_ahead
-    n_end <- n_pred
-    #r_obs_s <- subset(r_stack,n_start:n_end) #stack of observed layers, 35
-    r_obs_s <- subset(r_stack,n_start:n_end) #stack of observed layers, 35
-    
-    r_var2 <- subset(r_ref_s,i:n_pred)
-    r_ref_s <- crop(r_var2,r_clip) #used in the prediciton with only tow time steps
-    
-    data_reg2_spdf <- as(r_ref_s,"SpatialPointsDataFrame")
-    names(data_reg2_spdf) <- c("t1","t2")
-    data_reg2 <- as.data.frame(data_reg2_spdf)
-    data_reg2 <- na.omit(data_reg2) #remove NA...this reduces the number of observations
-    ols_temp_mod_pred_obj <-try(lm(t2 ~ t1, data=data_reg2))
-    #arima_pixel_pred_obj <- mclapply(1:length(pix_val2), FUN=pixel_ts_arima_predict,list_param=list_param_predict_arima_2,mc.preschedule=FALSE,mc.cores = num_cores) 
-    
-    filename_obj <- file.path(out_dir,paste("ols_temp_mod_pred_obj","_",out_suffix,".RData",sep=""))
-    save(ols_temp_mod_pred_obj,file=filename_obj)
-    #temp_mod <- paste("ols_temp_pred_obj","_",out_suffix,".RData",sep="")
-    #summary(lm_mod)
-  
-    #Predicted values and
-    data_reg2$temp_pred <- ols_temp_mod_pred_obj$fitted.values
-    #data_reg2$temp_res <- ols_temp_mod_pred_obj$residuals
-    data_reg2$temp_res <- ols_temp_mod_pred_obj$fitted.values - data_reg2$t2 #values greater should be positive
-    
-    coordinates(data_reg2) <- c("x","y")
-    proj4string(data_reg2) <- projection(r_ref_s)
-  
-    r_temp_pred <- rasterize(data_reg2,r_ref_s,field="temp_pred") #this is the prediction from lm model
-    r_temp_res <- rasterize(data_reg2,r_ref_s,field="temp_res") #this is the prediction from lm model
-    
-    #can change later to have t_step
-    #raster_name_pred <- paste(paste("r_temp_pred","_",estimator,"_",estimation_method,"_",n_start:n_end,sep=""),"_",out_suffix,file_format,sep="")
-    #raster_name_res <- paste(paste("r_temp_res","_",estimator,"_",estimation_method,"_",n_start:n_end,sep=""),"_",out_suffix,file_format,sep="")
 
-    raster_name_pred <- paste(paste("r_temp_pred","_",estimator,"_",estimation_method,"_",sep=""),"_",out_suffix,file_format,sep="")
-    raster_name_res <- paste(paste("r_temp_res","_",estimator,"_",estimation_method,"_",sep=""),"_",out_suffix,file_format,sep="")
-
-    
-    #raster_name_pred <- paste("r_temp_pred","_",estimator,"_",estimation_method,"_",out_suffix,file_format,sep="")
-    writeRaster(r_temp_pred,filename=file.path(out_dir,raster_name_pred),overwrite=TRUE)
-  
-    #raster_name_res <- paste("r_temp_res","_",estimator,"_",estimation_method,"_",out_suffix,file_format,sep="")
-    writeRaster(r_temp_res,filename=file.path(out_dir,raster_name_res),overwrite=TRUE)
-    #temp_mod <- NA #?
-    temp_mod <- file.path(out_dir,paste("ols_temp_mod_pred_obj","_",out_suffix,".RData",sep=""))
- 
-  }
- 
   if(estimation_method=="arima"){
     
     #This will be made a function callled from here!!!
