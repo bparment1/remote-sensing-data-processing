@@ -41,7 +41,7 @@ library(bitops)
 
 ### Other functions ####
 
-function_time_series_arima <- "time_series_arima_reg_functions_06082018.R" #PARAM 1
+function_time_series_arima <- "time_series_arima_reg_functions_06132018.R" #PARAM 1
 script_path <- "/home/bparmentier/z_drive/Data/projects/climatelandfeedbacks/scripts/" #path to script #PARAM 
 source(file.path(script_path,function_time_series_arima)) #source all functions used in this script 1.
 
@@ -88,8 +88,28 @@ lf_NDVI <- mixedsort(list.files(pattern="agg_5_r_NDVI_.*._NDVI_Dean_06062018.tif
                                 path="~/z_drive/Data/projects/climatelandfeedbacks/data/yucatan_NDVI",
                      full.names=T))
 r_stack <- stack(lf_NDVI)
-
+r_s <- subset(r_stack,1:23)
 #testing arima on aggregated data
+
+
+### Apply the sum function to every pixel
+calc(r_s,fun=sum,filename="test.tif")
+
+r_model <- raster("test.tif")
+plot(r_model) # this is the sum for every pixel
+
+showMethods(calc)
+#> showMethods(calc)
+#Function: calc (package raster)
+#x="Raster", fun="function"
+#x="RasterStack", fun="function"
+#(inherited from: x="Raster", fun="function")
+
+#View calc source code method
+getMethod("calc",signature=c(x="Raster",fun="function"))
+?pbCreate # to use progress bar when creating block function.
+
+
 
 
 ################# End of script #####################
