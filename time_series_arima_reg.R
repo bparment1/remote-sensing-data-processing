@@ -108,8 +108,9 @@ showMethods(calc)
 #View calc source code method
 getMethod("calc",signature=c(x="Raster",fun="function"))
 ?pbCreate # to use progress bar when creating block function.
+### looks like calc does not use a cluster, need to write a specific function with cluster
 
-
+### pixel based arima
 
 
 ################# End of script #####################
