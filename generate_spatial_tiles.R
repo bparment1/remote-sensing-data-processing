@@ -34,42 +34,34 @@ library(colorRamps)                          # Palette/color ramps for symbology
 library(ggplot2)
 
 ###### Functions used in this script
+function_tiling <- "generate_spatial_tiles_functions_06152018b.R" #PARAM 1
+script_path <- "/nfs/bparmentier-data/Data/projects/climatelandfeedbacks/scripts"
+source(file.path(script_path,function_tiling)) #source all functions used in this script 1.
 
-#This function creates a spatial polygon data frame object for the extent matching a raster input
-create_polygon_from_extent<-function(reg_ref_rast,outDir=NULL,outSuffix=NULL){
-  #This functions returns polygon sp from input rast
-  #Input Arguments: 
-  #reg_ref_rast: input ref rast
-  #outDir : output directory, if NULL then the current dir in used
-  #outSuffix: output suffix used for the naming of the shapefile
-  #Output: 
-  #reg_outline_poly: spatial polygon data.frame
-  #
-  if(is.null(outDir)){
-    outDir=getwd()
-  }
-  if(is.null(outSuffix)){
-    outSuffix=""
-  }
-  ref_e <- extent(reg_ref_rast) #extract extent from raster object
-  reg_outline_poly <- as(ref_e, "SpatialPolygons") #coerce raster extent object to SpatialPolygons from sp package 
-  reg_outline_poly <- as(reg_outline_poly, "SpatialPolygonsDataFrame") #promote to spdf
-  proj4string(reg_outline_poly) <- projection(reg_ref_rast) #Assign projection to spdf
-  infile_reg_outline <- paste("reg_out_line_",out_suffix,".shp",sep="") #name of newly crated shapefile with the extent
-  writeOGR(reg_outline_poly,dsn= outDir,layer= sub(".shp","",infile_reg_outline), 
-           driver="ESRI Shapefile",overwrite_layer="TRUE")
-  
-  return(reg_outline_poly) #return spdf
-}
+#####  Parameters and argument set up ###########
 
-#ARGS 4
-infile_ref_r <- "/research-home/bparmentier/Data/slurm_test/Exercise_2/data/r_mask_Alaska_11112014.tif" #WWF ecoregions 2001 for Alaska
-
+#ARGS 1
+in_dir <- "/nfs/bparmentier-data/Data/projects/climatelandfeedbacks/data"
+#ARGS 2
+out_dir <- "/nfs/bparmentier-data/Data/projects/climatelandfeedbacks/outputs"
+#ARGS 3
+NA_flag_val <- NULL
+#ARGS 4:
+file_format <- ".tif"
+#ARGS 5:
+scaling_factor <- 0.0001 #MODIFY THE SCALING FACTOR - FOR NORMALIZED DATA SHOULD BE 10,000 AT LEAST
 #ARGS 6
-NA_value <- -9999 #PARAM6
+create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 7
 out_suffix <-"test_tile" #output suffix for the files and ouptu folder #PARAM 8
 #ARGS 8
+num_cores <- 2 # number of cores
+
+#ARGS 9
+infile_ref_r <- "/research-home/bparmentier/Data/slurm_test/Exercise_2/data/r_mask_Alaska_11112014.tif" #WWF ecoregions 2001 for Alaska
+
+
+##################### Start script ################
 
 r_ref <- raster(infile_ref_r)
 plot(r_ref)
@@ -134,9 +126,10 @@ for(i in 1:length(list_tiles_names)){
 #ref_file <- lf_gimms[1]
 
 ##### Generate a grid/tile for processing:
-## Must transformed to a function later on.
+## Must fix the function
 
-generate_grid_tiles(ref_file,n_tile=4)
+debug(generate_grid_tiles)
+generate_grid_tiles(ref_file=infile_ref_r,n_tile=4)
 
 
 ############# end of script #############
