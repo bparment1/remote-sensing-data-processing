@@ -136,7 +136,7 @@ ref_file <- lf_gimms[1]
 ##### Generate a grid/tile for processing:
 ## Must transformed to a function later on.
 
-if(processing_steps$grid==TRUE){
+generate_grid_tiles <- function(ref_file,n_tile,n_tile_x, n_tile_y,out_suffix,out_dir){
   
   r <- raster(ref_file)
   
@@ -149,7 +149,7 @@ if(processing_steps$grid==TRUE){
   #Can buffer?
   
   #test_grid <- st_make_grid(outline_sf, n=18)
-  test_grid <- st_make_grid(outline_sf, n=9)
+  test_grid <- st_make_grid(outline_sf, n=n_tile)
   
   plot(r)
   plot(test_grid,add=T)
@@ -160,6 +160,7 @@ if(processing_steps$grid==TRUE){
   
   #Generate overlapping grid option to come later
   
+  return(test_grid)
 }
 
 ############# end of script #############
