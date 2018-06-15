@@ -60,8 +60,31 @@ num_cores <- 2 # number of cores
 #ARGS 9
 infile_ref_r <- "/research-home/bparmentier/Data/slurm_test/Exercise_2/data/r_mask_Alaska_11112014.tif" #WWF ecoregions 2001 for Alaska
 
+################# START SCRIPT ###############################
 
-##################### Start script ################
+######### PART 0: Set up the output dir ################
+
+options(scipen=999)
+
+#set up the working directory
+#Create output directory
+
+if(is.null(out_dir)){
+  out_dir <- in_dir #output will be created in the input dir
+  
+}
+#out_dir <- in_dir #output will be created in the input dir
+
+out_suffix_s <- out_suffix #can modify name of output suffix
+if(create_out_dir_param==TRUE){
+  out_dir <- create_dir_fun(out_dir,out_suffix)
+  setwd(out_dir)
+}else{
+  setwd(out_dir) #use previoulsy defined directory
+}
+
+#######################################
+### PART 1: Generate tiles with method 1 #######
 
 r_ref <- raster(infile_ref_r)
 plot(r_ref)
@@ -124,6 +147,9 @@ for(i in 1:length(list_tiles_names)){
 #lf_gimms <- mixedsort(list.files(pattern=file_format,path=in_dir,full.names=T))
 
 #ref_file <- lf_gimms[1]
+
+#######################################
+### PART 2: Generate tiles with method 2 #######
 
 ##### Generate a grid/tile for processing:
 ## Must fix the function
