@@ -129,38 +129,14 @@ for(i in 1:length(list_tiles_names)){
 
 #This can be non-overlapping or overlapping
 
-lf_gimms <- mixedsort(list.files(pattern=file_format,path=in_dir,full.names=T))
+#lf_gimms <- mixedsort(list.files(pattern=file_format,path=in_dir,full.names=T))
 
-ref_file <- lf_gimms[1]
+#ref_file <- lf_gimms[1]
 
 ##### Generate a grid/tile for processing:
 ## Must transformed to a function later on.
 
-generate_grid_tiles <- function(ref_file,n_tile,n_tile_x, n_tile_y,out_suffix,out_dir){
-  
-  r <- raster(ref_file)
-  
-  # for the time being generate a non-overlapping grid tiling and crop
-  extent_val <- extent(r)
-  bbox_val <- st_bbox(r)
-  test_sp <- as(extent_val, 'SpatialPolygons')
-  outline_sf <-as(test_sp,"sf")
-  
-  #Can buffer?
-  
-  #test_grid <- st_make_grid(outline_sf, n=18)
-  test_grid <- st_make_grid(outline_sf, n=n_tile)
-  
-  plot(r)
-  plot(test_grid,add=T)
-  plot(test_grid[56],add=T,col="red")
-  
-  out_grid_filename <- file.path(out_dir,"test_grid.shp")
-  st_write(test_grid,dsn=out_grid_filename)
-  
-  #Generate overlapping grid option to come later
-  
-  return(test_grid)
-}
+generate_grid_tiles(ref_file,n_tile=4)
+
 
 ############# end of script #############
