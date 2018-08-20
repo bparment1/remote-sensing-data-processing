@@ -183,10 +183,26 @@ table(data_df$Plant_Harvest)
 ### first recode Harvest to harvesting
 
 test$Plant_Harvest[test$Plant_Harvest=="Harvest"] <- "Harvesting"
-  
-table(test$Plant_Harvest)
-  
+data_df$Plant_Harvest[data_df$Plant_Harvest=="Harvest"] <- "Harvesting"  
+table(data_df$Plant_Harvest) #ok same number
+
+data_processed <- data_df
+
+data_Harvesting <- subset(data_processed,Plant_Harvest=="Harvesting")  
+dim(data_Harvesting)
+ncol(data_Harvesting)
+n_selected <- 4:ncol(data_Harvesting)
+data_m <- t(data_Harvesting[n_selected])
+
+dim(data_m)
+View(data_m)
 # Recode grade 5 to grade 6 and grade 6 to grade 7
+test$Grade<-recode(SchoolData$Grade,"5=6;6=7")
+
+dim(subset(data_df,Plant_Harvest=="Harvesting"))
+dim(data_df)
+table(data_df$Plant_Harvest)
+
 test$Grade<-recode(SchoolData$Grade,"5=6;6=7")
 
 library(dplyr)
@@ -197,5 +213,44 @@ test2 <- subset(test,test$Crop=="Winter_Wheat")
 
 xtabs(test2$Plant_Harvest)
 table(test2$Plant_Harvest)
+
+matrix_weeks <- test2[4:ncol(test2)]
+range(matrix_weeks[1,]+matrix_weeks[2,])
+
+data_in <- data_df
+state_val <- "California"
+screen_for_crop_status <- function(data_in,state_val){
+  data_subset <- subset(data_in,State==state_val)
+  #dim(data_subset)
+  crop_type <- unique(data_subset$Crop)
+   
+  ## check for coding error
+  xtabs(test2$Plant_Harvest)
+  table(test2$Plant_Harvest)
+  
+  debug(recode_crop)
+  recode_crop(crop_type=crope_type[1],data_crop=data_subset)
+  
+  recode_crop <- function(crop_type,data_crop){
+    ##
+    ##
+    
+    data_tmp <- subset(data_crop,data_crop$Crop==crop_type)
+    names(data_tmp)
+    selected_col <- grepl("X", names(data_tmp))
+    #df[ , grepl( "ABC" , names( df ) ) ]
+    
+    matrix_weeks <- t(data_tmp[,selected_col])
+    #matrix_weeks <- data_tmp[4:ncol(test2)]
+    range(matrix_weeks[1,]+matrix_weeks[2,])
+    xtabs(matrix_weeks[1,],matrix_weeks[2,])
+    
+    return()
+  }
+  
+  
+  <- subset(test,test$Crop=="Winter_Wheat")
+  
+}
 
 ##################  End of script #########
