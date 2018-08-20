@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 08/03/2018
+## DATE MODIFIED: 08/20/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
@@ -88,7 +88,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 7
-out_suffix <-"agbirds_processing_08032018" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_08202018" #output suffix for the files and ouptut folder
 #ARGS 8
 num_cores <- 2 # number of cores
 #ARGS 9
@@ -125,7 +125,8 @@ if(create_out_dir_param==TRUE){
 
 data_df <- read.table(file.path(in_dir,in_filename),
                       sep=",",
-                      header=T)
+                      header=T,
+                      stringsAsFactors = F)
 #View(data_df)
 names(data_df)
 #[1] "State"         "Crop"          "Plant_Harvest" "X1"            "X2"           
@@ -134,10 +135,20 @@ names(data_df)
 #[16] "X13" 
 
 
-# Please find attached the crop table. Within this table each crop type is separated by state and condition, either planting or harvesting. 
-# Within this table we are hoping to combine the planting and harvesting row for each crop type, by state. Currently planting and harvesting are coded as 0, 1, or 2 for each of the 52 weeks of the year. We want to change the harvesting values of 1 and 2 to 3 and 4, and then merge the planting and harvesting rows for each crop and each state. There should not be overlap between the planting and harvesting, but using xtab to find errors will be useful.
+# Please find attached the crop table. Within this table each crop type is separated
+#by state and condition, either planting or harvesting. 
+# Within this table we are hoping to combine the planting and harvesting row 
+#for each crop type, by state. Currently planting and harvesting are coded 
+#as 0, 1, or 2 for each of the 52 weeks of the year. 
+#We want to change the harvesting values of 1 and 2 to 3 and 4, and
+#then merge the planting and harvesting rows for each crop and each state. 
+#There should not be overlap between the planting and harvesting, but using xtab 
+#to find errors will be useful.
 # 
-# For the next step, we are hoping to convert this table into a spatial dataset. The final product should be 52 rasters (1 for each week) for each crop type (18 crop types listed in table) which includes cell values that represent the crop condition (0,1,2,3,4) which will vary by state.
+# For the next step, we are hoping to convert this table into a spatial dataset. 
+#The final product should be 52 rasters (1 for each week) for each crop type 
+#(18 crop types listed in table) which includes cell values that represent 
+#the crop condition (0,1,2,3,4) which will vary by state.
 # 
 # To test the following steps, we placed the CDL data for the state of Alabama in the agbirds-data folder under cdl_alabama. We placed a READ ME file with download information if helpful.
 # 
@@ -156,5 +167,35 @@ names(data_df)
 # 
 # 7) Create virtual raster table.
 
+names(data_df)
+table(data_df$State)
+test <- subset(data_df,State=="California")
+dim(test)
+View(test)
+names(data_df$State)
+xtabs(test$Plant_Harvest)
+
+table(test$Plant_Harvest)
+dim(test)
+
+table(data_df$Plant_Harvest)
+
+### first recode Harvest to harvesting
+
+test$Plant_Harvest[test$Plant_Harvest=="Harvest"] <- "Harvesting"
+  
+table(test$Plant_Harvest)
+  
+# Recode grade 5 to grade 6 and grade 6 to grade 7
+test$Grade<-recode(SchoolData$Grade,"5=6;6=7")
+
+library(dplyr)
+mutate(x, b = ifelse(a %in% c(1, 2, 3, 6, 7), 1, 0))
+
+table(test$Crop)
+test2 <- subset(test,test$Crop=="Winter_Wheat")
+
+xtabs(test2$Plant_Harvest)
+table(test2$Plant_Harvest)
 
 ##################  End of script #########
