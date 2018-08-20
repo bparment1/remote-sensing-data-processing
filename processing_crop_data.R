@@ -44,6 +44,7 @@ library(readxl) #functionalities to read in excel type data
 library(psych) #pca/eigenvector decomposition functionalities
 library(snow)
 library(sf)
+library(car)
 
 ###### Functions used in this script and sourced from other files
 
@@ -220,6 +221,9 @@ range(matrix_weeks[1,]+matrix_weeks[2,])
 data_in <- data_df
 state_val <- "California"
 screen_for_crop_status <- function(data_in,state_val){
+  ##
+  ##
+  
   data_subset <- subset(data_in,State==state_val)
   #dim(data_subset)
   crop_type <- unique(data_subset$Crop)
@@ -229,7 +233,7 @@ screen_for_crop_status <- function(data_in,state_val){
   table(test2$Plant_Harvest)
   
   debug(recode_crop)
-  recode_crop(crop_type=crope_type[1],data_crop=data_subset)
+  recode_crop(crop_type=crop_type[1],data_crop=data_subset)
   
   recode_crop <- function(crop_type,data_crop){
     ##
@@ -238,19 +242,43 @@ screen_for_crop_status <- function(data_in,state_val){
     data_tmp <- subset(data_crop,data_crop$Crop==crop_type)
     names(data_tmp)
     selected_col <- grepl("X", names(data_tmp))
+    
+    row.names(data_tmp) <- data_tmp$Plant_Harvest
+    
     #df[ , grepl( "ABC" , names( df ) ) ]
     
-    matrix_weeks <- t(data_tmp[,selected_col])
-    #matrix_weeks <- data_tmp[4:ncol(test2)]
-    range(matrix_weeks[1,]+matrix_weeks[2,])
-    xtabs(matrix_weeks[1,],matrix_weeks[2,])
+    weeks_df <- as.data.frame(t(data_tmp[,selected_col]))
     
-    return()
+    #test <- (data_tmp[,-selected_col])
+    
+    dim(weeks_df)
+    names(weeks_df)
+    #names(weeks_df) <- 
+    val_range <- range(weeks_df[,1]+weeks_df[,2])
+
+    val_tabs <- table(weeks_df[,1],weeks_df[,2])
+    
+    range_df <- data.frame(min=val_range[1],max=val_range[2])
+    range_df$crop <- crop_type
+    weeks_df$Harvesting
+    weeks_df$Harvesting <-recode(weeks_df$Harvesting,"1=3;2=4")
+    
+    data_out <- as.data.frame(t(weeks_df))
+    
+    data_out <- cbind(data_tmp[,!selected_col],data_out)
+    dim(data_out)
+    
+    if(range_df$max > 2){
+      data_out$flag <- 1
+    }
+    
+    obj <- list(val_tabs,range_df,data_out)
+    
+    return(obj)
   }
   
   
-  <- subset(test,test$Crop=="Winter_Wheat")
-  
+
 }
 
 ##################  End of script #########
