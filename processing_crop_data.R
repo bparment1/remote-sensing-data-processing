@@ -106,7 +106,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_08282018.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_08282018b.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 #########cd ###################################################################
@@ -134,7 +134,8 @@ in_filename <- "Crop_Data_modified.csv"
 
 in_filename_raster <- "cdl_alabama.tif"
 
-state_val <- "Alabama"
+#state_val <- "Alabama"
+state_val <- "California"
 
 ################# START SCRIPT ###############################
 
@@ -215,10 +216,19 @@ matrix_weeks <- test2[4:ncol(test2)]
 range(matrix_weeks[1,]+matrix_weeks[2,])
 
 data_in <- data_df
-state_val <- "California"
+#state_val <- "California"
 
-debug(screen_for_crop_status)
-screen_for_crop_status(data_in,state_val)
+#debug(screen_for_crop_status)
+list_crop_status_obj <- screen_for_crop_status(data_in,state_val)
   
-  
+### Exploring to recombine values:
+length(list_crop_status_obj)
+names(list_crop_status_obj)
+
+list_crop_status_obj$Spring_Barley[[1]]
+list_crop_status_obj$Spring_Barley
+list_crop_status_obj$Spring_Barley$data_out
+
+#combine data_out
+do.call()
 ##################  End of script #########
