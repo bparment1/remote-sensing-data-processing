@@ -241,12 +241,36 @@ View(data_species_df)
 
 list_states <- unique(data_in$State)
 
-mclapply(1:length(list_state),
+list_crop_status_obj <- mclapply(list_states,
          FUN=screen_for_crop_status,
          data_in,
          mc.preschedule = FALSE,
          mc.cores= num_cores)
-### reversing arguments!!!
-list_crop_status_obj <- screen_for_crop_status(state_val,data_in)
+
+#### summarize results:
+
+list_summary_crop <- vector("list",length=length(list_crop_status_obj))
+for(i in 1:length(list_crop_status_obj)){
+  list_data_out <- lapply(list_crop_status_obj[[i]],function(x){x$data_out})
+  #combine data_out
+  data_species_df <- do.call(rbind,list_data_out)
+  
+  list_summary_crop[[i]]<- data_species_df
+}
+
+data_screened_df <- do.call(rbind,list_summary_crop)
+
+dim(data_screened_df)
+dim(data_screened_df)
+dim(data_in)
+
+View(data_screened_df)
+
+table(data_screened_df$flag)
+sum(is.na(data_screened_df$flag))
+
+write.table(data_screened_df,
+            paste0("data_screened_df_",out_suffix,".txt")
+            )
 
 ##################  End of script #########
