@@ -55,9 +55,6 @@ screen_for_crop_status <- function(data_in,state_val){
   #dim(data_subset)
   crop_type <- unique(data_subset$Crop)
    
-  ## check for coding error
-  #xtabs(test2$Plant_Harvest)
-  #table(test2$Plant_Harvest)
   
   #debug(recode_crop)
   #obj_crop <- recode_crop(crop_type=crop_type[5],data_crop=data_subset)
@@ -68,13 +65,8 @@ screen_for_crop_status <- function(data_in,state_val){
            mc.preschedule = F,
            mc.cores = num_cores)
   
-  #[[5]]
-  #[1] "Error in if (range_df$max > 2) { : missing value where TRUE/FALSE needed\n"
-  #attr(,"class")
-  #[1] "try-error"
-  #attr(,"condition")
-  #<simpleError in if (range_df$max > 2) {    data_out$flag <- 1}: missing value where TRUE/FALSE needed>
-    
+  names(list_obj_crop) <- crop_type
+  
   return(list_obj_crop)
 }
 
@@ -118,6 +110,7 @@ recode_crop <- function(crop_type,data_crop){
   }
   
   obj <- list(val_tabs,range_df,data_out)
+  names(obj) <- c("val_tabs","range_df","data_out")
   
   return(obj)
 }
