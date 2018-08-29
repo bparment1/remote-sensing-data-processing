@@ -106,7 +106,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_08282018b.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_08292018.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 #########cd ###################################################################
@@ -217,6 +217,7 @@ range(matrix_weeks[1,]+matrix_weeks[2,])
 
 data_in <- data_df
 #state_val <- "California"
+dim(data_in)
 
 #debug(screen_for_crop_status)
 list_crop_status_obj <- screen_for_crop_status(data_in,state_val)
@@ -229,6 +230,23 @@ list_crop_status_obj$Spring_Barley[[1]]
 list_crop_status_obj$Spring_Barley
 list_crop_status_obj$Spring_Barley$data_out
 
+list_data_out <- lapply(list_crop_status_obj,function(x){x$data_out})
 #combine data_out
-do.call()
+data_species_df <- do.call(rbind,list_data_out)
+
+dim(data_species_df)
+View(data_species_df)
+
+### Now you can do this across all the state and have a summary
+
+list_states <- unique(data_in$State)
+
+mclapply(1:length(list_state),
+         FUN=screen_for_crop_status,
+         data_in,
+         mc.preschedule = FALSE,
+         mc.cores= num_cores)
+### reversing arguments!!!
+list_crop_status_obj <- screen_for_crop_status(state_val,data_in)
+
 ##################  End of script #########
