@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 08/28/2018
+## DATE MODIFIED: 08/29/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
@@ -47,7 +47,7 @@ library(sf)
 library(car)
 
 ###### Functions used in this script and sourced from other files
-screen_for_crop_status <- function(data_in,state_val){
+screen_for_crop_status <- function(state_val,data_in){
   ##
   ##
   
