@@ -3,14 +3,14 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 08/28/2018
+## DATE MODIFIED: 08/31/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
 ## ISSUE: 
 ## TO DO:
 ##
-## COMMIT: testing function
+## COMMIT: clean up and recoding 
 ##
 
 #### Instructions:
@@ -106,7 +106,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_08292018.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_08312018.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 #########cd ###################################################################
@@ -124,7 +124,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 7
-out_suffix <-"agbirds_processing_08282018" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_08312018" #output suffix for the files and ouptut folder
 #ARGS 8
 num_cores <- 2 # number of cores
 #ARGS 9
@@ -168,59 +168,20 @@ data_df <- read.table(file.path(in_dir,in_filename),
                       sep=",",
                       header=T,
                       stringsAsFactors = F)
+
 #View(data_df)
 names(data_df)
 
 table(data_df$State)
-test <- subset(data_df,State=="California")
-dim(test)
-#View(test)
-names(data_df$State)
-
-table(test$Plant_Harvest)
-dim(test)
-
-table(data_df$Plant_Harvest)
-
-### first recode Harvest to harvesting
-
-test$Plant_Harvest[test$Plant_Harvest=="Harvest"] <- "Harvesting"
-data_df$Plant_Harvest[data_df$Plant_Harvest=="Harvest"] <- "Harvesting"  
-table(data_df$Plant_Harvest) #ok same number
-
-data_processed <- data_df
-
-data_Harvesting <- subset(data_processed,Plant_Harvest=="Harvesting")  
-dim(data_Harvesting)
-ncol(data_Harvesting)
-n_selected <- 4:ncol(data_Harvesting)
-data_m <- t(data_Harvesting[n_selected])
-
-dim(data_m)
-View(data_m)
-
-dim(subset(data_df,Plant_Harvest=="Harvesting"))
-dim(data_df)
-table(data_df$Plant_Harvest)
-
-test$Grade<-recode(SchoolData$Grade,"5=6;6=7")
-
-
-table(test$Crop)
-test2 <- subset(test,test$Crop=="Winter_Wheat")
-
-xtabs(test2$Plant_Harvest)
-table(test2$Plant_Harvest)
-
-matrix_weeks <- test2[4:ncol(test2)]
-range(matrix_weeks[1,]+matrix_weeks[2,])
 
 data_in <- data_df
 #state_val <- "California"
 dim(data_in)
 
+##### test the function:
 #debug(screen_for_crop_status)
-list_crop_status_obj <- screen_for_crop_status(data_in,state_val)
+state_val
+list_crop_status_obj <- screen_for_crop_status(state_val,data_in)
   
 ### Exploring to recombine values:
 length(list_crop_status_obj)
@@ -249,9 +210,12 @@ list_crop_status_obj <- mclapply(list_states,
 
 #### summarize results:
 
+### Still getting error here!!!
+
 list_summary_crop <- vector("list",length=length(list_crop_status_obj))
 for(i in 1:length(list_crop_status_obj)){
   list_data_out <- lapply(list_crop_status_obj[[i]],function(x){x$data_out})
+  names(list_crop_status_obj[[1]])
   #combine data_out
   data_species_df <- do.call(rbind,list_data_out)
   
