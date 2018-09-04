@@ -47,14 +47,26 @@ library(sf)
 library(car)
 
 ###### Functions used in this script and sourced from other files
+
+
 screen_for_crop_status <- function(state_val,data_in){
-  ##
-  ##
+  ##This function recode crop values and check for overlap between planting and 
+  #harvesting periods. The steps in the recoding and screening:
+  # - subset by state
+  # - find unique crop types
+  # - for each crop recode values for haversting from 1 and 2 to 3 and 4
+  #
+  ######## Start script ######
   
+  #### Step 1: subset by state:
   data_subset <- subset(data_in,State==state_val)
   #dim(data_subset)
+  
+  #### Step 2: find unique crop types
+  
   crop_type <- unique(data_subset$Crop)
    
+  #### Step 3: recode crop values for havesting
   
   #debug(recode_crop)
   #obj_crop <- recode_crop(crop_type=crop_type[5],data_crop=data_subset)
@@ -65,14 +77,24 @@ screen_for_crop_status <- function(state_val,data_in){
            mc.preschedule = F,
            mc.cores = num_cores)
   
+  ### Assign crop values
   names(list_obj_crop) <- crop_type
   
+  ### return object
   return(list_obj_crop)
 }
 
 recode_crop <- function(crop_type,data_crop){
   ##
   ##
+  
+  #Within this table we are hoping to combine the planting and harvesting row 
+  ##for each crop type, by state. Currently planting and harvesting are coded 
+  ##as 0, 1, or 2 for each of the 52 weeks of the year. 
+  #We want to change the harvesting values of 1 and 2 to 3 and 4, and
+  #then merge the planting and harvesting rows for each crop and each state. 
+  #There should not be overlap between the planting and harvesting, but using xtab 
+  #to find errors will be useful.
   
   data_tmp <- subset(data_crop,data_crop$Crop==crop_type)
   names(data_tmp)
