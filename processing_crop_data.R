@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 08/31/2018
+## DATE MODIFIED: 09/06/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
@@ -106,7 +106,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_08312018.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_09062018.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 #########cd ###################################################################
@@ -124,7 +124,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 7
-out_suffix <-"agbirds_processing_08312018" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_09062018" #output suffix for the files and ouptut folder
 #ARGS 8
 num_cores <- 2 # number of cores
 #ARGS 9
@@ -169,9 +169,17 @@ data_df <- read.table(file.path(in_dir,in_filename),
                       header=T,
                       stringsAsFactors = F)
 
+
+### First clean up before setting up the coding:
+
+table(data_df$Plant_Harvest)
+
+data_df$Plant_Harvest[data_df$Plant_Harvest=="Harvest"] <- "Harvesting"
+table(data_df$Plant_Harvest)
+
 #View(data_df)
 names(data_df)
-
+dim(data_df)
 table(data_df$State)
 
 data_in <- data_df
