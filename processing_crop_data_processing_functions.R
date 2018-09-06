@@ -69,7 +69,7 @@ screen_for_crop_status <- function(state_val,data_in){
   #### Step 3: recode crop values for havesting
   
   #debug(recode_crop)
-  #obj_crop <- recode_crop(crop_type=crop_type[5],data_crop=data_subset)
+  obj_crop <- recode_crop(crop_type=crop_type[8],data_crop=data_subset)
   
   list_obj_crop <- mclapply(crop_type,
            FUN=recode_crop,
@@ -85,13 +85,8 @@ screen_for_crop_status <- function(state_val,data_in){
 }
 
 recode_crop <- function(crop_type,data_crop){
-  ##
-  ##
-  
-  #Within this table we are hoping to combine the planting and harvesting row 
-  ##for each crop type, by state. Currently planting and harvesting are coded 
-  ##as 0, 1, or 2 for each of the 52 weeks of the year. 
-  #We want to change the harvesting values of 1 and 2 to 3 and 4, and
+  ##This functions recode values for Harvesting and Plangint
+  # Harvesting values of 1 and 2 to 3 and 4, and
   #then merge the planting and harvesting rows for each crop and each state. 
   #There should not be overlap between the planting and harvesting, but using xtab 
   #to find errors will be useful.
