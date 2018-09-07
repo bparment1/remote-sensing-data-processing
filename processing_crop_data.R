@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 09/06/2018
+## DATE MODIFIED: 09/07/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
@@ -106,7 +106,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_09062018.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_09072018.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 #########cd ###################################################################
@@ -124,7 +124,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 7
-out_suffix <-"agbirds_processing_09062018" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_09072018" #output suffix for the files and ouptut folder
 #ARGS 8
 num_cores <- 2 # number of cores
 #ARGS 9
@@ -204,7 +204,7 @@ list_data_out <- lapply(list_crop_status_obj,function(x){x$data_out})
 data_species_df <- do.call(rbind,list_data_out)
 
 dim(data_species_df)
-View(data_species_df)
+#View(data_species_df)
 
 ### Now you can do this across all the state and have a summary
 
@@ -216,6 +216,8 @@ list_crop_status_obj <- mclapply(list_states,
          mc.preschedule = FALSE,
          mc.cores= num_cores)
 
+#undebug(screen_for_crop_status)
+test <- screen_for_crop_status(list_states[21],data_in)
 #### summarize results:
 
 ### Still getting error here!!!
