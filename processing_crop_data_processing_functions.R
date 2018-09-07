@@ -68,8 +68,8 @@ screen_for_crop_status <- function(state_val,data_in){
    
   #### Step 3: recode crop values for havesting
   
-  #debug(recode_crop)
-  obj_crop <- recode_crop(crop_type=crop_type[8],data_crop=data_subset)
+  #undebug(recode_crop)
+  #obj_crop <- recode_crop(crop_type=crop_type[8],data_crop=data_subset)
   
   list_obj_crop <- mclapply(crop_type,
            FUN=recode_crop,
