@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 09/07/2018
+## DATE MODIFIED: 09/10/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
@@ -124,7 +124,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 7
-out_suffix <-"agbirds_processing_09072018" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_09102018" #output suffix for the files and ouptut folder
 #ARGS 8
 num_cores <- 2 # number of cores
 #ARGS 9
@@ -217,7 +217,7 @@ list_crop_status_obj <- mclapply(list_states,
          mc.cores= num_cores)
 
 #undebug(screen_for_crop_status)
-test <- screen_for_crop_status(list_states[21],data_in)
+#test <- screen_for_crop_status(list_states[21],data_in)
 #### summarize results:
 
 ### Still getting error here!!!
