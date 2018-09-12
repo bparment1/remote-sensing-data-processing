@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 09/10/2018
+## DATE MODIFIED: 09/12/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
@@ -124,7 +124,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 7
-out_suffix <-"agbirds_processing_09102018" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_09122018" #output suffix for the files and ouptut folder
 #ARGS 8
 num_cores <- 2 # number of cores
 #ARGS 9
@@ -246,5 +246,7 @@ sum(is.na(data_screened_df$flag))
 write.table(data_screened_df,
             paste0("data_screened_df_",out_suffix,".txt")
             )
+
+subset(data_screened_df,flag==1)[,1:6]
 
 ##################  End of script #########
