@@ -10,7 +10,7 @@
 ## ISSUE: 
 ## TO DO:
 ##
-## COMMIT: initial commit
+## COMMIT: generate crop status layer
 ##
 
 #### Instructions:
@@ -249,8 +249,33 @@ write.table(data_screened_df,
 
 subset(data_screened_df,flag==1)[,1:6]
 
-##### raster
+##### raster: test on alabama: will need to subset by state 
 
+
+in_filename_raster <- "cdl_alabama.tif"
+
+r_region <- raster(file.path(in_dir,in_filename_raster))
+
+plot(r_region)
+r_region
+
+## for each week reclassify for the relevant crop and state:
+
+##screen for Alabama and for a specific crop
+
+# create raster
+su
+m <- c(-1.64, 10, 0,
+       -1.96, -1.64, 1,  
+       -10, -1.96,2)
+
+rclmat <- matrix(m, ncol=3, byrow=TRUE)
+
+r_impact1 <- reclassify(r_std,rclmat)
+freq(r_ref)
+freq(r_impact1)
+
+read.dbf(file, as.is = FALSE)
 
 
 ##################  End of script #########
