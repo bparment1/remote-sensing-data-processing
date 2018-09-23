@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 09/12/2018
+## DATE MODIFIED: 09/14/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
@@ -132,6 +132,7 @@ num_cores <- 2 # number of cores
 
 in_filename <- "Crop_Data_modified.csv"
 
+in_filename_raster <- "cdl_alabama.tif"
 in_filename_raster <- "cdl_alabama.tif"
 
 #state_val <- "Alabama"
