@@ -253,6 +253,20 @@ subset(data_screened_df,flag==1)[,1:6]
 ##### raster: test on alabama: will need to subset by state 
 
 
+
+in_filename_legend <- "CDL_2017_01.tif.vat.dbf"
+test <- read.dbf(file.path(in_dir,in_filename_legend))
+
+View(test)
+test$CLASS_NAME <- as.character(test$CLASS_NAME)
+unique(test$CLASS_NAME)
+
+unique(data_screened_df$Crop)
+### will need to match the names of crop in the legend to the names in the dataset created by the workshop!
+
+common crop_list <- intersect(unique(data_screened_df$Crop),unique(test$CLASS_NAME))
+
+
 in_filename_raster <- "cdl_alabama.tif"
 
 r_region <- raster(file.path(in_dir,in_filename_raster))
@@ -265,7 +279,10 @@ r_region
 ##screen for Alabama and for a specific crop
 
 # create raster
-su
+
+r_region@data$cdl_alabama
+str(r_region)
+
 m <- c(-1.64, 10, 0,
        -1.96, -1.64, 1,  
        -10, -1.96,2)
@@ -276,7 +293,6 @@ r_impact1 <- reclassify(r_std,rclmat)
 freq(r_ref)
 freq(r_impact1)
 
-read.dbf(file, as.is = FALSE)
-
+#################
 
 ##################  End of script #########
