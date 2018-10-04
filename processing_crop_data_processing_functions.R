@@ -69,7 +69,7 @@ screen_for_crop_status <- function(state_val,data_in){
   #### Step 3: recode crop values for havesting
   
   #undebug(recode_crop)
-  #obj_crop <- recode_crop(crop_type=crop_type[8],data_crop=data_subset)
+  obj_crop <- recode_crop(crop_type=crop_type[2],data_crop=data_subset)
   
   list_obj_crop <- mclapply(crop_type,
            FUN=recode_crop,
@@ -93,6 +93,7 @@ recode_crop <- function(crop_type,data_crop){
   
   data_tmp <- subset(data_crop,data_crop$Crop==crop_type)
   names(data_tmp)
+  head(data_tmp)
   selected_col <- grepl("X", names(data_tmp))
   
   row.names(data_tmp) <- data_tmp$Plant_Harvest
@@ -107,7 +108,11 @@ recode_crop <- function(crop_type,data_crop){
   range_df <- data.frame(min=val_range[1],max=val_range[2])
   range_df$crop <- crop_type
   #weeks_df$Harvesting
-  weeks_df$Harvesting <-recode(weeks_df$Harvesting,"1=3;2=4")
+  #test <- car::recode(weeks_df$Harvesting,"1=3";"2=4")
+  weeks_df$Harvesting <- dplyr::recode(weeks_df$Harvesting, `1` = 3L, `2` = 4L)
+  #test <- dplyr::recode(weeks_df$Harvesting, `1` = 3, `2` = 4)
+  
+  #weeks_df$Harvesting <-recode(weeks_df$Harvesting,"1=3;2=4")
   
   data_out <- as.data.frame(t(weeks_df))
   
