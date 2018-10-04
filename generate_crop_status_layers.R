@@ -3,9 +3,9 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 09/14/2018
+## DATE MODIFIED: 10/04/2018
 ## AUTHORS: Benoit Parmentier  
-## Version: 1
+## Version: 2
 ## PROJECT: Agbirds
 ## ISSUE: 
 ## TO DO:
@@ -106,7 +106,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_09072018.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_10042018.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 #########cd ###################################################################
@@ -133,10 +133,9 @@ num_cores <- 2 # number of cores
 in_filename <- "Crop_Data_modified.csv"
 
 in_filename_raster <- "cdl_alabama.tif"
-in_filename_raster <- "cdl_alabama.tif"
 
-#state_val <- "Alabama"
-state_val <- "California"
+state_val <- "Alabama"
+#state_val <- "California"
 
 ################# START SCRIPT ###############################
 
@@ -188,9 +187,9 @@ data_in <- data_df
 dim(data_in)
 
 ##### test the function:
-#debug(screen_for_crop_status)
+#undebug(screen_for_crop_status)
 state_val
-list_crop_status_obj <- screen_for_crop_status(state_val,data_in)
+test_state <- screen_for_crop_status(state_val,data_in)
   
 ### Exploring to recombine values:
 length(list_crop_status_obj)
@@ -280,9 +279,9 @@ in_filename_raster <- "cdl_alabama.tif"
 crop_status_df <- filter(data_screened_df,Crop==crop_name) %>%
                     filter(State==region_name)
 
-crop_status_df <- filter(data_screened_df,State==region_name)
+#crop_status_df <- filter(data_screened_df,State==region_name)
 
-View(crop_status_df)
+#View(crop_status_df)
 
 ######## start function here:
 
@@ -304,9 +303,8 @@ str(r_region)
 ### class_id
 
 r_val <- r_region
-?mask
 
-mask(r_val,inverse=T,mask_value=val)
+#mask(r_val,inverse=T,mask_value=val)
 
 fun <- function(x) { x[x!=val] <- NA; return(x) }
 r_val <- calc(r_val, fun)
