@@ -252,22 +252,40 @@ subset(data_screened_df,flag==1)[,1:6]
 
 ##### raster: test on alabama: will need to subset by state 
 
-
-
 in_filename_legend <- "CDL_2017_01.tif.vat.dbf"
-test <- read.dbf(file.path(in_dir,in_filename_legend))
+legend_df <- read.dbf(file.path(in_dir,in_filename_legend))
 
-View(test)
-test$CLASS_NAME <- as.character(test$CLASS_NAME)
-unique(test$CLASS_NAME)
+#View(test)
+legend_df$CLASS_NAME <- as.character(legend_df$CLASS_NAME)
+unique(legend_df$CLASS_NAME)
 
 unique(data_screened_df$Crop)
 ### will need to match the names of crop in the legend to the names in the dataset created by the workshop!
 
-common crop_list <- intersect(unique(data_screened_df$Crop),unique(test$CLASS_NAME))
+common_crop_list <- intersect(unique(data_screened_df$Crop),unique(legend_df$CLASS_NAME))
 
+legend_df_subset <- subset(legend_df,CLASS_NAME%in% common_crop_list)
+
+######## start the function here:
+
+i <- 2
+
+val <- legend_df_subset$VALUE[i]
+crop_name <- legend_df_subset$CLASS_NAME[i]
+region_name <- "Alabama"
+out_suffix <- ""
 
 in_filename_raster <- "cdl_alabama.tif"
+
+crop_status_df <- filter(data_screened_df,Crop==crop_name) %>%
+                    filter(State==region_name)
+
+crop_status_df <- filter(data_screened_df,State==region_name)
+
+View(crop_status_df)
+
+######## start function here:
+
 
 r_region <- raster(file.path(in_dir,in_filename_raster))
 
@@ -280,8 +298,21 @@ r_region
 
 # create raster
 
-r_region@data$cdl_alabama
 str(r_region)
+#tb_freq <- freq(r_region)
+
+### class_id
+
+r_val <- r_region
+?mask
+
+mask(r_val,inverse=T,mask_value=val)
+
+fun <- function(x) { x[x!=val] <- NA; return(x) }
+r_val <- calc(r_val, fun)
+
+### Now generate for 52 weeks:
+
 
 m <- c(-1.64, 10, 0,
        -1.96, -1.64, 1,  
@@ -290,9 +321,5 @@ m <- c(-1.64, 10, 0,
 rclmat <- matrix(m, ncol=3, byrow=TRUE)
 
 r_impact1 <- reclassify(r_std,rclmat)
-freq(r_ref)
-freq(r_impact1)
-
-#################
 
 ##################  End of script #########
