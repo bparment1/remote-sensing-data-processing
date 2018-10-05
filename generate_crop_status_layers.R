@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 10/04/2018
+## DATE MODIFIED: 10/05/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -124,7 +124,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 7
-out_suffix <-"agbirds_processing_09122018" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_10052018" #output suffix for the files and ouptut folder
 #ARGS 8
 num_cores <- 2 # number of cores
 #ARGS 9
@@ -249,7 +249,8 @@ write.table(data_screened_df,
 
 subset(data_screened_df,flag==1)[,1:6]
 
-##### raster: test on alabama: will need to subset by state 
+##### raster: test on alabama: will need to subset by 
+#state 
 
 in_filename_legend <- "CDL_2017_01.tif.vat.dbf"
 legend_df <- read.dbf(file.path(in_dir,in_filename_legend))
