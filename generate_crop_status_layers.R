@@ -313,12 +313,42 @@ r_val <- calc(r_val, fun)
 
 ### Now generate for 52 weeks:
 j <- 1
-for(j in 1:52){
+for(j in 1:52){  
   #m
-  col_val
+  col_val <- "X15"
   col_val <- paste0("X",j) # week
   
-  crop_status_df[[col_val]]
+  val_to_code <- sum(crop_status_df[[col_val]]) #first value is planting, the other one is havesting
+  
+  
+  if(use_r=TRUE){
+    
+    df <- data.frame(id=val, v=val_to_code)
+    r_out <- subs(r_val, df,filename=out_filename)
+    #x2 <- subs(r, df, subsWithNA=FALSE)
+    
+  }
+  
+  if(use_gdal=TRUE){
+    
+    #down vote
+    #Yes another way exists.
+    
+    #Just use gdal_calc.py
+    
+    #For example, below will convert the values below 3 to 0 and above 3 to 1. You can use equals as well.
+    
+    #gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="0*(A<3)" --calc="1*(A>3)"
+    #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
+    #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
+    gdal_command <- paste("gdal_calc.py",
+                          "-A",in_filename,
+                          "--outfile=",out_filename,
+                          "--calc=",#'val_to_recode*(A==val)',
+                          "--calc="0*(A==val)")
+    system(gdal_command)
+    
+  }
 }
 
 m <- c(-1.64, 10, 0,

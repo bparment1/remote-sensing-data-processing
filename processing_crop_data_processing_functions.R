@@ -60,7 +60,7 @@ screen_for_crop_status <- function(state_val,data_in){
   
   #### Step 1: subset by state:
   data_subset <- subset(data_in,State==state_val)
-  #dim(data_subset)
+  #dim(data_sub  set)
   
   #### Step 2: find unique crop types
   
