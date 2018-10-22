@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 10/05/2018
+## DATE MODIFIED: 10/22/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -106,7 +106,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_10042018.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_10222018.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 #########cd ###################################################################
@@ -124,7 +124,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 7
-out_suffix <-"agbirds_processing_10052018" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_10222018" #output suffix for the files and ouptut folder
 #ARGS 8
 num_cores <- 2 # number of cores
 #ARGS 9
@@ -189,22 +189,16 @@ dim(data_in)
 ##### test the function:
 #undebug(screen_for_crop_status)
 state_val
-test_state <- screen_for_crop_status(state_val,data_in)
+crop_status_obj <- screen_for_crop_status(state_val,data_in)
   
 ### Exploring to recombine values:
-length(list_crop_status_obj)
-names(list_crop_status_obj)
+length(crop_status_obj)
+names(crop_status_obj)
 
-list_crop_status_obj$Spring_Barley[[1]]
-list_crop_status_obj$Spring_Barley
-list_crop_status_obj$Spring_Barley$data_out
+crop_status_obj$Corn_Grain
+crop_status_obj$Corn_Grain
+crop_status_obj$Corn_Grain$data_out
 
-list_data_out <- lapply(list_crop_status_obj,function(x){x$data_out})
-#combine data_out
-data_species_df <- do.call(rbind,list_data_out)
-
-dim(data_species_df)
-#View(data_species_df)
 
 ### Now you can do this across all the state and have a summary
 
@@ -215,6 +209,13 @@ list_crop_status_obj <- mclapply(list_states,
          data_in,
          mc.preschedule = FALSE,
          mc.cores= num_cores)
+
+list_data_out <- lapply(list_crop_status_obj,function(x){x$data_out})
+#combine data_out
+data_species_df <- do.call(rbind,list_data_out)
+
+dim(data_species_df)
+#View(data_species_df)
 
 #undebug(screen_for_crop_status)
 #test <- screen_for_crop_status(list_states[21],data_in)
@@ -238,7 +239,7 @@ dim(data_screened_df)
 dim(data_screened_df)
 dim(data_in)
 
-View(data_screened_df)
+head(data_screened_df)
 
 table(data_screened_df$flag)
 sum(is.na(data_screened_df$flag))
@@ -268,7 +269,7 @@ legend_df_subset <- subset(legend_df,CLASS_NAME%in% common_crop_list)
 
 ######## start the function here:
 
-i <- 2
+i <- 1
 
 val <- legend_df_subset$VALUE[i]
 crop_name <- legend_df_subset$CLASS_NAME[i]
@@ -311,7 +312,14 @@ fun <- function(x) { x[x!=val] <- NA; return(x) }
 r_val <- calc(r_val, fun)
 
 ### Now generate for 52 weeks:
-
+j <- 1
+for(j in 1:52){
+  #m
+  col_val
+  col_val <- paste0("X",j) # week
+  
+  crop_status_df[[col_val]]
+}
 
 m <- c(-1.64, 10, 0,
        -1.96, -1.64, 1,  
