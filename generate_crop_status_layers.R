@@ -324,6 +324,7 @@ for(j in 1:52){
   if(use_r=TRUE){
     
     df <- data.frame(id=val, v=val_to_code)
+    out_filename <- "tmp.tif"
     r_out <- subs(r_val, df,filename=out_filename)
     #x2 <- subs(r, df, subsWithNA=FALSE)
     
@@ -337,10 +338,11 @@ for(j in 1:52){
     #Just use gdal_calc.py
     
     #For example, below will convert the values below 3 to 0 and above 3 to 1. You can use equals as well.
-    
+    in_filename 
     #gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="0*(A<3)" --calc="1*(A>3)"
     #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
     #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
+    
     gdal_command <- paste("gdal_calc.py",
                           "-A",in_filename,
                           "--outfile=",out_filename,
