@@ -287,19 +287,26 @@ crop_status_df <- filter(data_screened_df,Crop==crop_name) %>%
 
 ######## start function here:
 
-generate_crop_status_raster <- function(in_filename_raster,crop_name,algorithm,num_cores,file_format,out_dir,out_suffix){
+generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status_df,
+                                        algorithm,num_cores,file_format,out_dir,out_suffix){
   #
   #
+  #1)  in_filename_raster
+  #2) crop_name,algorithm
+  #3) num_cores
+  #4) file_format
+  #5) out_dir
+  #6) out_suffix
   #
   
   ##### Start script #######
   
   r_region <- raster(file.path(in_dir,in_filename_raster))
   
-  plot(r_region)
-  r_region
+  #plot(r_region)
+  #r_region
   
-  str(r_region)
+  #str(r_region)
   r_val <- r_region
   
   #mask(r_val,inverse=T,mask_value=val)
@@ -312,7 +319,9 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,algorithm,n
   ### Now generate for 52 weeks:
   
   j <- 1
-  use_r <- TRUE
+  #use_r <- TRUE
+  
+  reclassify_raster <- function()
   for(j in 1:52){  
     #m
     col_val <- "X15"
@@ -322,7 +331,7 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,algorithm,n
     val_to_code <- sum(crop_status_df[[col_val]]) #first value is planting, the other one is havesting
     
     if(val_to_recode>0){
-      if(use_r==TRUE){
+      if(algorithm=="R"){
         
         df <- data.frame(id=val, v=val_to_code)
         out_filename <- "tmp.tif"
@@ -331,7 +340,7 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,algorithm,n
         
       }
       
-      if(use_gdal==TRUE){
+      if(algorithm=="GDAL"){
         
         #Just use gdal_calc.py
         
