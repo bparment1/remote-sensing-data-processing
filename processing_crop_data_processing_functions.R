@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 08/29/2018
+## DATE MODIFIED: 11/13/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
@@ -137,6 +137,99 @@ recode_crop <- function(crop_type,data_crop){
   return(obj)
 }
 
+reclassify_raster <- function(j,crop_status,in_filename,file_format){
+  
+  col_val <- paste0("X",j) # week
+  
+  val_to_code <- sum(crop_status_df[[col_val]]) #first value is planting, the other one is havesting
+  
+  if(val_to_recode>0){
+    if(algorithm=="R"){
+      
+      df <- data.frame(id=val, v=val_to_code)
+      out_filename <- "tmp.tif"
+      r_out <- subs(r_val, df,filename=out_filename)
+      #x2 <- subs(r, df, subsWithNA=FALSE)
+      gald_command <- NULL
+    }
+    
+    if(algorithm=="GDAL"){
+      
+      #Just use gdal_calc.py
+      
+      #For example, below will convert the values below 3 to 0 and above 3 to 1. You can use equals as well.
+      in_filename <- crop_out_filename
+      #gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="0*(A<3)" --calc="1*(A>3)"
+      #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
+      #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
+      out_filename <- paste0(region_name,"_",crop_name,"_","week_",j,file_format)
+      
+      gdal_command <- paste0("gdal_calc.py",
+                             " -A ",in_filename,
+                             " --outfile=",out_filename,
+                             " --calc=",paste0("'(",val_to_code,"*(A==",val,"))'")#,
+                             #" --calc=",paste0("'(0*(A!=",val,"))'")
+      )
+      gdal_command
+      system(gdal_command)
+      #r<- raster(out_filename)
+      
+    }
+    
+  }else{
+    out_filename <- NULL
+  }
+  
+  obj_out <- list(out_filename,gdal_command)
+  
+  return(obj_out)
+}
 
+generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status_df,
+                                        algorithm,num_cores,file_format,out_dir,out_suffix){
+  #
+  #
+  #1)  in_filename_raster
+  #2) crop_name,algorithm
+  #3) num_cores
+  #4) file_format
+  #5) out_dir
+  #6) out_suffix
+  #
+  
+  ##### Start script #######
+  
+  r_region <- raster(file.path(in_dir,in_filename_raster))
+  
+  #plot(r_region)
+  #r_region
+  
+  #str(r_region)
+  r_val <- r_region
+  
+  #mask(r_val,inverse=T,mask_value=val)
+  
+  fun <- function(x) { x[x!=val] <- NA; return(x) }
+  r_val <- calc(r_val, fun)
+  crop_out_filename <- paste0(crop_name,"_",val,file_format)
+  writeRaster(r_val,filename = file.path(out_dir,crop_out_filename))
+  
+  ### Now generate for 52 weeks:
+  
+  j <- 1
+  #use_r <- TRUE
+  test_obj <- reclassify_raster(1,
+                       crop_status=crop_status,
+                       in_filename=in_filename,
+                       file_format=file_format)
+  
+  list_obj <- mclapply(1:52,
+                       FUN=reclassify_raster,
+                       crop_status=crop_status,
+                       in_filename=in_filename,
+                       file_format=file_format)
+  
+  return(out_filename)
+}
 
 ##################  End of script #########
