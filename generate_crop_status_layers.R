@@ -368,19 +368,13 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
   
   j <- 1
   #use_r <- TRUE
-  
-  #for(j in 1:52){  
+  list_obj <- mclapply(1:52,
+                       FUN=reclassify_raster,
+                       crop_status=crop_status,
+                       in_filename=in_filename,
+                       file_format=file_format)
   
   return(out_filename)
 }
-
-
-m <- c(-1.64, 10, 0,
-       -1.96, -1.64, 1,  
-       -10, -1.96,2)
-
-rclmat <- matrix(m, ncol=3, byrow=TRUE)
-
-r_impact1 <- reclassify(r_std,rclmat)
 
 ##################  End of script #########
