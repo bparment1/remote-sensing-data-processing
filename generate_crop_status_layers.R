@@ -3,14 +3,14 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 10/22/2018
+## DATE MODIFIED: 11/13/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
 ## ISSUE: 
 ## TO DO:
 ##
-## COMMIT: generate crop status layer
+## COMMIT: Generate 
 ##
 
 #### Instructions:
@@ -106,7 +106,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_10222018.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_11132018.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 #########cd ###################################################################
@@ -124,7 +124,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 7
-out_suffix <-"agbirds_processing_10222018" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_11132018" #output suffix for the files and ouptut folder
 #ARGS 8
 num_cores <- 2 # number of cores
 #ARGS 9
@@ -135,7 +135,7 @@ in_filename <- "Crop_Data_modified.csv"
 in_filename_raster <- "cdl_alabama.tif"
 
 state_val <- "Alabama"
-#state_val <- "California"
+
 
 ################# START SCRIPT ###############################
 
@@ -287,80 +287,80 @@ crop_status_df <- filter(data_screened_df,Crop==crop_name) %>%
 
 ######## start function here:
 
-
-r_region <- raster(file.path(in_dir,in_filename_raster))
-
-plot(r_region)
-r_region
-
-## for each week reclassify for the relevant crop and state:
-
-##screen for Alabama and for a specific crop
-
-# create raster
-
-str(r_region)
-#tb_freq <- freq(r_region)
-
-### class_id
-
-r_val <- r_region
-
-#mask(r_val,inverse=T,mask_value=val)
-
-fun <- function(x) { x[x!=val] <- NA; return(x) }
-r_val <- calc(r_val, fun)
-crop_out_filename <- paste0(crop_name,"_",val,file_format)
-writeRaster(r_val,filename = file.path(out_dir,crop_out_filename))
-
-### Now generate for 52 weeks:
-
-j <- 1
-use_r <- TRUE
-for(j in 1:52){  
-  #m
-  col_val <- "X15"
+generate_crop_status_raster <- function(in_filename_raster,crop_name,algorithm,num_cores,file_format,out_dir,out_suffix){
+  #
+  #
+  #
   
-  col_val <- paste0("X",j) # week
+  ##### Start script #######
   
-  val_to_code <- sum(crop_status_df[[col_val]]) #first value is planting, the other one is havesting
+  r_region <- raster(file.path(in_dir,in_filename_raster))
   
-  if(val_to_recode>0){
-    if(use_r==TRUE){
-      
-      df <- data.frame(id=val, v=val_to_code)
-      out_filename <- "tmp.tif"
-      r_out <- subs(r_val, df,filename=out_filename)
-      #x2 <- subs(r, df, subsWithNA=FALSE)
-      
-    }
+  plot(r_region)
+  r_region
+  
+  str(r_region)
+  r_val <- r_region
+  
+  #mask(r_val,inverse=T,mask_value=val)
+  
+  fun <- function(x) { x[x!=val] <- NA; return(x) }
+  r_val <- calc(r_val, fun)
+  crop_out_filename <- paste0(crop_name,"_",val,file_format)
+  writeRaster(r_val,filename = file.path(out_dir,crop_out_filename))
+  
+  ### Now generate for 52 weeks:
+  
+  j <- 1
+  use_r <- TRUE
+  for(j in 1:52){  
+    #m
+    col_val <- "X15"
     
-    if(use_gdal==TRUE){
+    col_val <- paste0("X",j) # week
+    
+    val_to_code <- sum(crop_status_df[[col_val]]) #first value is planting, the other one is havesting
+    
+    if(val_to_recode>0){
+      if(use_r==TRUE){
+        
+        df <- data.frame(id=val, v=val_to_code)
+        out_filename <- "tmp.tif"
+        r_out <- subs(r_val, df,filename=out_filename)
+        #x2 <- subs(r, df, subsWithNA=FALSE)
+        
+      }
       
-      #Just use gdal_calc.py
-      
-      #For example, below will convert the values below 3 to 0 and above 3 to 1. You can use equals as well.
-      in_filename <- crop_out_filename
-      #gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="0*(A<3)" --calc="1*(A>3)"
-      #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
-      #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
-      out_filename <- paste0(region_name,"_",crop_name,"_","week_",j,file_format)
-      
-      gdal_command <- paste0("gdal_calc.py",
-                            " -A ",in_filename,
-                            " --outfile=",out_filename,
-                            " --calc=",paste0("'(",val_to_code,"*(A==",val,"))'")#,
-                            #" --calc=",paste0("'(0*(A!=",val,"))'")
-                            )
-      gdal_command
-      system(gdal_command)
-      r<- raster(out_filename)
+      if(use_gdal==TRUE){
+        
+        #Just use gdal_calc.py
+        
+        #For example, below will convert the values below 3 to 0 and above 3 to 1. You can use equals as well.
+        in_filename <- crop_out_filename
+        #gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="0*(A<3)" --calc="1*(A>3)"
+        #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
+        #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
+        out_filename <- paste0(region_name,"_",crop_name,"_","week_",j,file_format)
+        
+        gdal_command <- paste0("gdal_calc.py",
+                               " -A ",in_filename,
+                               " --outfile=",out_filename,
+                               " --calc=",paste0("'(",val_to_code,"*(A==",val,"))'")#,
+                               #" --calc=",paste0("'(0*(A!=",val,"))'")
+        )
+        gdal_command
+        system(gdal_command)
+        r<- raster(out_filename)
+        
+      }
       
     }
     
   }
   
+  return(out_filename)
 }
+
 
 m <- c(-1.64, 10, 0,
        -1.96, -1.64, 1,  
