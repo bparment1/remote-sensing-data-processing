@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 11/13/2018
+## DATE MODIFIED: 11/14/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
@@ -137,7 +137,7 @@ recode_crop <- function(crop_type,data_crop){
   return(obj)
 }
 
-reclassify_raster <- function(j,crop_status,in_filename,file_format){
+reclassify_raster <- function(j,crop_status,in_filename,algorithm,file_format){
   
   col_val <- paste0("X",j) # week
   
@@ -191,21 +191,20 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
                                         algorithm,num_cores,file_format,out_dir,out_suffix){
   # This function generates crop raster status for a given region (state).
   #
-  #1)  in_filename_raster: 
-  #2) crop_name,algorithm
-  #3) num_cores
-  #4) file_format
-  #5) out_dir
-  #6) out_suffix
+  #1) in_filename_raster: input raster file name
+  #2) crop_name: name of crop (check in fiel provided)
+  #3) crop_status_df: input file containing crop status: 0,1,2,3,4
+  #4) algorithm: GDAL or R, use GDAL for larger images
+  #5) num_cores: default is 1
+  #6) file_format:default value is ".tif"
+  #7) out_dir: output dir
+  #8) out_suffix: suffix added to filename
   #
   
   ##### Start script #######
   
   r_region <- raster(file.path(in_dir,in_filename_raster))
-  
   r_val <- r_region
-  
-  #mask(r_val,inverse=T,mask_value=val)
   
   fun <- function(x) { x[x!=val] <- NA; return(x) }
   r_val <- calc(r_val, fun)
@@ -217,18 +216,22 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
   ### Now generate for 52 weeks:
   
   j <- 1
-  debug(reclassify_raster)
+  #debug(reclassify_raster)
   
-  test_obj <- reclassify_raster(1,
-                       crop_status=crop_status,
-                       in_filename=in_filename,
-                       file_format=file_format)
+  #test_obj <- reclassify_raster(15,
+  #                     crop_status=crop_status,
+  #                     in_filename=in_filename,
+  #                     algorithm="GDAL",
+  #                     file_format=file_format)
   
-  list_obj <- mclapply(1:52,
+  list_obj <- mclapply(1:16,
                        FUN=reclassify_raster,
                        crop_status=crop_status,
                        in_filename=in_filename,
-                       file_format=file_format)
+                       algorithm="GDAL",
+                       file_format=file_format,
+                       mc.cores = num_cores,
+                       mc.preschedule = FALSE)
   
   return(list_obj)
 }
