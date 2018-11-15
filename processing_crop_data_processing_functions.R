@@ -143,7 +143,7 @@ reclassify_raster <- function(j,crop_status,in_filename,file_format){
   
   val_to_code <- sum(crop_status_df[[col_val]]) #first value is planting, the other one is havesting
   
-  if(val_to_recode>0){
+  if(val_to_code>0){
     if(algorithm=="R"){
       
       df <- data.frame(id=val, v=val_to_code)
@@ -178,18 +178,20 @@ reclassify_raster <- function(j,crop_status,in_filename,file_format){
     
   }else{
     out_filename <- NULL
+    gdal_command <- NULL
   }
   
   obj_out <- list(out_filename,gdal_command)
+  names(obj_out) <- c("out_filename","gdal_command")
   
   return(obj_out)
 }
 
 generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status_df,
                                         algorithm,num_cores,file_format,out_dir,out_suffix){
+  # This function generates crop raster status for a given region (state).
   #
-  #
-  #1)  in_filename_raster
+  #1)  in_filename_raster: 
   #2) crop_name,algorithm
   #3) num_cores
   #4) file_format
@@ -201,10 +203,6 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
   
   r_region <- raster(file.path(in_dir,in_filename_raster))
   
-  #plot(r_region)
-  #r_region
-  
-  #str(r_region)
   r_val <- r_region
   
   #mask(r_val,inverse=T,mask_value=val)
@@ -212,12 +210,15 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
   fun <- function(x) { x[x!=val] <- NA; return(x) }
   r_val <- calc(r_val, fun)
   crop_out_filename <- paste0(crop_name,"_",val,file_format)
-  writeRaster(r_val,filename = file.path(out_dir,crop_out_filename))
+  writeRaster(r_val,
+              filename = file.path(out_dir,crop_out_filename),
+              overwrite=TRUE)
   
   ### Now generate for 52 weeks:
   
   j <- 1
-  #use_r <- TRUE
+  debug(reclassify_raster)
+  
   test_obj <- reclassify_raster(1,
                        crop_status=crop_status,
                        in_filename=in_filename,
@@ -229,7 +230,7 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
                        in_filename=in_filename,
                        file_format=file_format)
   
-  return(out_filename)
+  return(list_obj)
 }
 
 ##################  End of script #########
