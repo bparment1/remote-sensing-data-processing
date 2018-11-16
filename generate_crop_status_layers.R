@@ -3,14 +3,14 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 11/14/2018
+## DATE MODIFIED: 11/16/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
 ## ISSUE: 
 ## TO DO:
 ##
-## COMMIT: Generate raster layer, fixing bug
+## COMMIT: test code for production of layers,
 ##
 
 #### Instructions:
@@ -106,7 +106,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_11142018d.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_11162018.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 #########cd ###################################################################
@@ -124,7 +124,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 7
-out_suffix <-"agbirds_processing_11142018" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_11162018" #output suffix for the files and ouptut folder
 #ARGS 8
 num_cores <- 2 # number of cores
 #ARGS 9
@@ -279,7 +279,7 @@ out_suffix <- ""
 crop_status_df <- filter(data_screened_df,Crop==crop_name) %>%
                     filter(State==region_name)
 
-debug(generate_crop_status_raster)
+#undebug(generate_crop_status_raster)
 test <- generate_crop_status_raster(in_filename_raster,crop_name,crop_status_df,
                                         algorithm,num_cores,file_format,out_dir,out_suffix)
 #
