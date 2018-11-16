@@ -138,6 +138,16 @@ recode_crop <- function(crop_type,data_crop){
 }
 
 reclassify_raster <- function(j,crop_status,in_filename,algorithm,file_format){
+  # This function reclassifies a raster into a specific class given data.frame of input.
+  # The goal is to generate one raster for every week in a year.
+  #
+  #INPUTS:
+  #1) j: week considered from 1 to 52
+  #2) crop_status_df: input file containing crop status: 0,1,2,3,4
+  #3)
+  #4) algorithm: GDAL or R, use GDAL for larger images
+  #OUTPUTS
+  #
   
   col_val <- paste0("X",j) # week
   
@@ -158,7 +168,7 @@ reclassify_raster <- function(j,crop_status,in_filename,algorithm,file_format){
       #Just use gdal_calc.py
       
       #For example, below will convert the values below 3 to 0 and above 3 to 1. You can use equals as well.
-      in_filename <- crop_out_filename
+      #in_filename <- crop_out_filename
       #gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="0*(A<3)" --calc="1*(A>3)"
       #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
       #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
@@ -167,9 +177,9 @@ reclassify_raster <- function(j,crop_status,in_filename,algorithm,file_format){
       gdal_command <- paste0("gdal_calc.py",
                              " -A ",in_filename,
                              " --outfile=",out_filename,
-                             " --calc=",paste0("'(",val_to_code,"*(A==",val,"))'")#,
-                             #" --calc=",paste0("'(0*(A!=",val,"))'")
-      )
+                             " --calc=",paste0("'(",val_to_code,"*(A==",val,"))'"),
+                             " --overwrite")
+      
       gdal_command
       system(gdal_command)
       #r<- raster(out_filename)
@@ -191,6 +201,7 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
                                         algorithm,num_cores,file_format,out_dir,out_suffix){
   # This function generates crop raster status for a given region (state).
   #
+  #INPUTS:
   #1) in_filename_raster: input raster file name
   #2) crop_name: name of crop (check in fiel provided)
   #3) crop_status_df: input file containing crop status: 0,1,2,3,4
@@ -199,6 +210,7 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
   #6) file_format:default value is ".tif"
   #7) out_dir: output dir
   #8) out_suffix: suffix added to filename
+  #OUTPUTS
   #
   
   ##### Start script #######
@@ -219,21 +231,22 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
   #debug(reclassify_raster)
   
   #test_obj <- reclassify_raster(15,
-  #                     crop_status=crop_status,
-  #                     in_filename=in_filename,
+  #                     crop_status=crop_status_df,
+  #                     in_filename=file.path(out_dir,crop_out_filename),
   #                     algorithm="GDAL",
-  #                     file_format=file_format)
+  #                    file_format=file_format)
   
-  list_obj <- mclapply(1:16,
+  list_obj <- mclapply(1:52,
                        FUN=reclassify_raster,
                        crop_status=crop_status,
-                       in_filename=in_filename,
+                       in_filename=file.path(out_dir,crop_out_filename),
                        algorithm="GDAL",
                        file_format=file_format,
                        mc.cores = num_cores,
                        mc.preschedule = FALSE)
-  
-  return(list_obj)
+   browser()
+   
+   return(list_obj)
 }
 
-##################  End of script #########
+###########################  End of script #########################
