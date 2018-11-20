@@ -3,14 +3,14 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 11/14/2018
+## DATE MODIFIED: 11/20/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
 ## ISSUE: 
 ## TO DO:
 ##
-## COMMIT: Fixing some NA issue in the crop haversting and planting
+## COMMIT: extracting output information.
 ##
 
 ###################################################
@@ -245,6 +245,33 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
                        mc.cores = num_cores,
                        mc.preschedule = FALSE)
    browser()
+   
+   list_obj[[14]]$out_filename
+   
+   extract_outputs <- function(x){
+     # extract output filenames:
+     out_filename <- x$out_filename
+     gdal_command <- x$gdal_command
+     
+     if(is.null(out_filename)){
+       out_filename <- NA
+       gdal_command <- NA
+     }
+     
+     out_df <- data.frame(filename=out_filename,gdal_command=gdal_command)
+     return(out_df)
+   }
+   
+   #test2 <- unlist(lapply(list_obj,FUN=))
+   rows_out_df <- lapply(list_obj,FUN=extract_outputs)
+   out_df <- do.call(rbind,rows_out_df)
+   #View(out_df)
+   
+   n_col <- ncol(crop_status_df)
+   crop_df <- t(crop_status_df[,-c(1,2,3,n_col)])
+   out_df$status <- rowSums(crop_df)
+   
+   ### Now prepare to return object
    
    return(list_obj)
 }
