@@ -3,14 +3,14 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 11/16/2018
+## DATE MODIFIED: 11/20/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
 ## ISSUE: 
 ## TO DO:
 ##
-## COMMIT: test code for production of layers,
+## COMMIT: check outputs for the agbirds team
 ##
 
 #### Instructions:
@@ -106,10 +106,10 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_11162018.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_11202018.R"
 source(file.path(script_path,crop_data_processing_functions))
 
-#########cd ###################################################################
+############################################################################
 #####  Parameters and argument set up ########### 
 
 #ARGS 1
@@ -123,19 +123,18 @@ NA_flag_val <- NULL
 file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
+#ARGS 6
+out_suffix <-"agbirds_processing_11202018" #output suffix for the files and ouptut folder
 #ARGS 7
-out_suffix <-"agbirds_processing_11162018" #output suffix for the files and ouptut folder
-#ARGS 8
 num_cores <- 2 # number of cores
-#ARGS 9
-#date_param <- "1982.01.01;1982.12.31" #start date, end date
-
+#ARGS 8
 in_filename <- "Crop_Data_modified.csv"
-
+#ARGS 9
 in_filename_raster <- "cdl_alabama.tif"
-
+#ARGS 10
 state_val <- "Alabama"
-
+#ARGS 11
+crop_name <- NULL #if NULL run for all crop in the given state
 
 ################# START SCRIPT ###############################
 
@@ -183,8 +182,10 @@ dim(data_df)
 table(data_df$State)
 
 data_in <- data_df
-#state_val <- "California"
 dim(data_in)
+
+#######################################
+### PART 2: Screen status crop data #######
 
 ##### test the function:
 #undebug(screen_for_crop_status)
@@ -199,7 +200,7 @@ crop_status_obj$Corn_Grain
 crop_status_obj$Corn_Grain
 crop_status_obj$Corn_Grain$data_out
 
-### Now you can do this across all the state and have a summary
+### Now you can do this across all the states and have a summary
 
 list_states <- unique(data_in$State)
 
@@ -208,19 +209,6 @@ list_crop_status_obj <- mclapply(list_states,
          data_in,
          mc.preschedule = FALSE,
          mc.cores= num_cores)
-
-list_data_out <- lapply(list_crop_status_obj,function(x){x$data_out})
-#combine data_out
-data_species_df <- do.call(rbind,list_data_out)
-
-dim(data_species_df)
-#View(data_species_df)
-
-#undebug(screen_for_crop_status)
-#test <- screen_for_crop_status(list_states[21],data_in)
-#### summarize results:
-
-### Still getting error here!!!
 
 list_summary_crop <- vector("list",length=length(list_crop_status_obj))
 for(i in 1:length(list_crop_status_obj)){
@@ -233,21 +221,19 @@ for(i in 1:length(list_crop_status_obj)){
 }
 
 data_screened_df <- do.call(rbind,list_summary_crop)
-
-dim(data_screened_df)
 dim(data_screened_df)
 dim(data_in)
 
 head(data_screened_df)
-
 table(data_screened_df$flag)
 sum(is.na(data_screened_df$flag))
 
 write.table(data_screened_df,
-            paste0("data_screened_df_",out_suffix,".txt")
+            file.path(out_dir,paste0("data_screened_df_",out_suffix,".txt"))
             )
 
-subset(data_screened_df,flag==1)[,1:6]
+#######################################
+### PART 3: Generate raster crop status layer for different crops #######
 
 ##### raster: test on alabama: will need to subset by 
 #state 
@@ -266,22 +252,35 @@ common_crop_list <- intersect(unique(data_screened_df$Crop),unique(legend_df$CLA
 
 legend_df_subset <- subset(legend_df,CLASS_NAME%in% common_crop_list)
 
-######## start the function here:
+###############################################
+########### PART 4: Now generate raster crop status
 
-i <- 1
-
-val <- legend_df_subset$VALUE[i] #for each crop
-crop_name <- legend_df_subset$CLASS_NAME[i]
 region_name <- state_val
-out_suffix <- ""
 
+if(!is.nul(crop_name)){
+  #undebug(generate_crop_status_raster)
+  test <- generate_crop_status_raster(in_filename_raster,
+                                      crop_name,
+                                      crop_status_df,
+                                      algorithm,
+                                      num_cores,
+                                      file_format,
+                                      out_dir,out_suffix)
+}else{
+  
+  i <- 1
+  
+  crop_name <- legend_df_subset$CLASS_NAME[i]
+  
+  crop_status_df <- filter(data_screened_df,Crop==crop_name) %>%
+    filter(State==region_name)
+  
+  #undebug(generate_crop_status_raster)
+  test <- generate_crop_status_raster(in_filename_raster,crop_name,crop_status_df,
+                                      algorithm,num_cores,
+                                      file_format,out_dir,out_suffix)
+  #
+  
+}
 
-crop_status_df <- filter(data_screened_df,Crop==crop_name) %>%
-                    filter(State==region_name)
-
-#undebug(generate_crop_status_raster)
-test <- generate_crop_status_raster(in_filename_raster,crop_name,crop_status_df,
-                                        algorithm,num_cores,file_format,out_dir,out_suffix)
-#
-
-#####################  End of script ##########################
+#####################  End of script ###############################
