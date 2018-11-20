@@ -200,6 +200,12 @@ reclassify_raster <- function(j,crop_status,in_filename,algorithm,file_format){
 generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status_df,
                                         algorithm,num_cores,file_format,out_dir,out_suffix){
   # This function generates crop raster status for a given region (state).
+  # The status of crops by pixel is based on four categories:
+  # 0=not active
+  # 1=planting active
+  # 2=planting intense
+  # 3=harvesting active
+  # 4=harvesting intense
   #
   #INPUTS:
   #1) in_filename_raster: input raster file name
@@ -211,7 +217,9 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
   #7) out_dir: output dir
   #8) out_suffix: suffix added to filename
   #OUTPUTS
-  #
+  #An object as a list made of two items:
+  #1) 
+  #2)
   
   ##### Start script #######
   
@@ -262,7 +270,6 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
      return(out_df)
    }
    
-   #test2 <- unlist(lapply(list_obj,FUN=))
    rows_out_df <- lapply(list_obj,FUN=extract_outputs)
    out_df <- do.call(rbind,rows_out_df)
    #View(out_df)
@@ -271,9 +278,16 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
    crop_df <- t(crop_status_df[,-c(1,2,3,n_col)])
    out_df$status <- rowSums(crop_df)
    
-   ### Now prepare to return object
+   barplot(out_df$status,names=1:52)
    
-   return(list_obj)
+   out_filename_df <- paste0("output_df_",out_suffix,".txt")
+   write.table(out_df,out_filename_df)
+   
+   ### Now prepare to return object
+   raster_generation_obj <- list(out_df,list_obj)
+   names(raster_generation_obj) <- c("out_df","list_obj")
+   
+   return(raster_generation_obj)
 }
 
-###########################  End of script #########################
+###########################  End of script
