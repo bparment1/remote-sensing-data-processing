@@ -106,7 +106,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_11202018.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_11202018c.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -259,8 +259,9 @@ region_name <- state_val
 
 if(!is.nul(crop_name)){
   #undebug(generate_crop_status_raster)
-  test <- generate_crop_status_raster(in_filename_raster,
-                                      crop_name,
+  test <- generate_crop_status_raster(crop_name,
+                                      in_filename_raster,
+                                      region_name,
                                       crop_status_df,
                                       algorithm,
                                       num_cores,
@@ -268,19 +269,23 @@ if(!is.nul(crop_name)){
                                       out_dir,out_suffix)
 }else{
   
+  
   i <- 1
-  
-  crop_name <- legend_df_subset$CLASS_NAME[i]
-  
-  crop_status_df <- filter(data_screened_df,Crop==crop_name) %>%
-    filter(State==region_name)
+  list_crop_name <- legend_df_subset$CLASS_NAME
   
   #undebug(generate_crop_status_raster)
-  test <- generate_crop_status_raster(in_filename_raster,crop_name,crop_status_df,
-                                      algorithm,num_cores,
-                                      file_format,out_dir,out_suffix)
+  test <- generate_crop_status_raster(crop_name,
+                                      in_filename_raster,
+                                      region_name,
+                                      crop_status_df,
+                                      algorithm,
+                                      num_cores,
+                                      file_format,
+                                      out_dir,
+                                      out_suffix)
   #
   
+  lapply(1)
 }
 
 #####################  End of script ###############################
