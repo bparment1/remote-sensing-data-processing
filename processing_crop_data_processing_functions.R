@@ -213,8 +213,16 @@ extract_outputs <- function(x){
 }
 
 
-generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status_df,
+generate_crop_status_raster <- function(crop_name,
+                                        in_filename_raster,
+                                        region_name,
+                                        crop_status_df,
                                         algorithm,num_cores,file_format,out_dir,out_suffix){
+  #
+  # CREATED: 
+  # MODIFIED:
+  # AUTHORS: Benoit Parmentier
+  #
   # This function generates crop raster status for a given region (state).
   # The status of crops by pixel is based on four categories:
   # 0=not active
@@ -224,20 +232,25 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
   # 4=harvesting intense
   #
   #INPUTS:
-  #1) in_filename_raster: input raster file name
-  #2) crop_name: name of crop (check in fiel provided)
-  #3) crop_status_df: input file containing crop status: 0,1,2,3,4
-  #4) algorithm: GDAL or R, use GDAL for larger images
-  #5) num_cores: default is 1
-  #6) file_format:default value is ".tif"
-  #7) out_dir: output dir
-  #8) out_suffix: suffix added to filename
+  #1) crop_name: name of crop (check in fiel provided)
+  #2) in_filename_raster: input raster file name
+  #3) region_name: relevant region name (state in this case)
+  #4) crop_status_df: input file containing crop status: 0,1,2,3,4
+  #5) algorithm: GDAL or R, use GDAL for larger images
+  #6) num_cores: default is 1
+  #7) file_format:default value is ".tif"
+  #8) out_dir: output dir
+  #9) out_suffix: suffix added to filename
   #OUTPUTS
   #Data frame:
   #1) out_df: data.frame containing output raster name and status
-  #2) list_obj:
   
   ##### Start script #######
+  
+  crop_status_df <- filter(crop_status_df,Crop==crop_name) %>%
+    filter(State==region_name)
+  
+  #### Genereate specific crop layer
   
   r_region <- raster(file.path(in_dir,in_filename_raster))
   r_val <- r_region
@@ -278,16 +291,15 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
    crop_df <- t(crop_status_df[,-c(1,2,3,n_col)])
    out_df$status <- rowSums(crop_df)
    
+   out_df$region <- region_name
+   out_df$crop_name <- crop_name
+   
    barplot(out_df$status,names=1:52)
    
-   out_filename_df <- paste0("output_df_",out_suffix,".txt")
+   out_filename_df <- paste0("output_df_",region_name,"_",crop_name,"_",out_suffix,".txt")
    write.table(out_df,out_filename_df)
    
-   ### Now prepare to return object
-   raster_generation_obj <- list(out_df,list_obj)
-   names(raster_generation_obj) <- c("out_df","list_obj")
-   
-   return(raster_generation_obj)
+   return(out_df)
 }
 
 ###########################  End of script
