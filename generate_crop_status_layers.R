@@ -109,7 +109,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_11202018d.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_11212018.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -287,6 +287,7 @@ if(!is.nul(crop_name)){
                                       in_filename_raster,
                                       region_name,
                                       data_screened_df,
+                                      legend_df,
                                       algorithm,
                                       num_cores,
                                       file_format,
