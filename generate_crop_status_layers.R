@@ -10,7 +10,7 @@
 ## ISSUE: 
 ## TO DO:
 ##
-## COMMIT: check outputs for the agbirds team
+## COMMIT: run for Cotton crop and Alabama
 ##
 
 #### Instructions:
@@ -46,6 +46,9 @@
 # 6) Combine all crop layers to have 52 rasters (1 for each week) with cells that have 2 values: crop type and crop condition.
 # 
 # 7) Create virtual raster table.
+
+#### Note that the current code may be run on the SESYNC HPC cluster by using the 11 input parameters. 
+#### The input must be set up to call from the shell and generate array job
 
 ###################################################
 #
@@ -106,7 +109,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_11202018c.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_11202018d.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -134,7 +137,12 @@ in_filename_raster <- "cdl_alabama.tif"
 #ARGS 10
 state_val <- "Alabama"
 #ARGS 11
-crop_name <- NULL #if NULL run for all crop in the given state
+#crop_name <- NULL #if NULL run for all crop in the given state
+crop_name <- "Cotton"
+
+##### Constant:
+
+in_filename_legend <- "CDL_2017_01.tif.vat.dbf"
 
 ################# START SCRIPT ###############################
 
@@ -233,12 +241,11 @@ write.table(data_screened_df,
             )
 
 #######################################
-### PART 3: Generate raster crop status layer for different crops #######
+### PART 3: Select relevant crops for the region #######
 
 ##### raster: test on alabama: will need to subset by 
 #state 
 
-in_filename_legend <- "CDL_2017_01.tif.vat.dbf"
 legend_df <- read.dbf(file.path(in_dir,in_filename_legend))
 
 #View(test)
@@ -259,25 +266,27 @@ region_name <- state_val
 
 if(!is.nul(crop_name)){
   #undebug(generate_crop_status_raster)
-  test <- generate_crop_status_raster(crop_name,
+  
+  list_out_df <- generate_crop_status_raster(crop_name,
                                       in_filename_raster,
                                       region_name,
-                                      crop_status_df,
+                                      data_screened_df,
                                       algorithm,
                                       num_cores,
                                       file_format,
-                                      out_dir,out_suffix)
+                                      out_dir,
+                                      out_suffix)
 }else{
   
   
   i <- 1
-  list_crop_name <- legend_df_subset$CLASS_NAME
+  crop_name <- legend_df_subset$CLASS_NAME
   
   #undebug(generate_crop_status_raster)
-  test <- generate_crop_status_raster(crop_name,
+  test <- generate_crop_status_raster(crop_name[i],
                                       in_filename_raster,
                                       region_name,
-                                      crop_status_df,
+                                      data_screened_df,
                                       algorithm,
                                       num_cores,
                                       file_format,
@@ -285,7 +294,18 @@ if(!is.nul(crop_name)){
                                       out_suffix)
   #
   
-  lapply(1)
+  list_out_df <- lapply(crop_name,
+                        FUN=generate_crop_status_raster,
+                        in_filename_raster=in_filename_raster,
+                        region_name=region_name,
+                        crop_status_df=data_screened_df,
+                        algorithm=algorithm,
+                        num_cores=num_cores,
+                        file_format=file_format,
+                        out_dir=out_dir,
+                        out_suffix=out_suffix)
 }
+
+
 
 #####################  End of script ###############################
