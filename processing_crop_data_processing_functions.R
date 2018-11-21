@@ -10,7 +10,7 @@
 ## ISSUE: 
 ## TO DO:
 ##
-## COMMIT: extracting output information.
+## COMMIT: clean up of code
 ##
 
 ###################################################
@@ -197,6 +197,22 @@ reclassify_raster <- function(j,crop_status,in_filename,algorithm,file_format){
   return(obj_out)
 }
 
+#Function to extract produced raster
+extract_outputs <- function(x){
+  # extract output filenames:
+  out_filename <- x$out_filename
+  gdal_command <- x$gdal_command
+  
+  if(is.null(out_filename)){
+    out_filename <- NA
+    gdal_command <- NA
+  }
+  
+  out_df <- data.frame(filename=out_filename,gdal_command=gdal_command)
+  return(out_df)
+}
+
+
 generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status_df,
                                         algorithm,num_cores,file_format,out_dir,out_suffix){
   # This function generates crop raster status for a given region (state).
@@ -217,9 +233,9 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
   #7) out_dir: output dir
   #8) out_suffix: suffix added to filename
   #OUTPUTS
-  #An object as a list made of two items:
-  #1) 
-  #2)
+  #Data frame:
+  #1) out_df: data.frame containing output raster name and status
+  #2) list_obj:
   
   ##### Start script #######
   
@@ -252,24 +268,8 @@ generate_crop_status_raster <- function(in_filename_raster,crop_name,crop_status
                        file_format=file_format,
                        mc.cores = num_cores,
                        mc.preschedule = FALSE)
-   browser()
-   
-   list_obj[[14]]$out_filename
-   
-   extract_outputs <- function(x){
-     # extract output filenames:
-     out_filename <- x$out_filename
-     gdal_command <- x$gdal_command
-     
-     if(is.null(out_filename)){
-       out_filename <- NA
-       gdal_command <- NA
-     }
-     
-     out_df <- data.frame(filename=out_filename,gdal_command=gdal_command)
-     return(out_df)
-   }
-   
+   #browser()
+
    rows_out_df <- lapply(list_obj,FUN=extract_outputs)
    out_df <- do.call(rbind,rows_out_df)
    #View(out_df)
