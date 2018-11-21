@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 11/20/2018
+## DATE MODIFIED: 11/21/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
@@ -219,7 +219,7 @@ generate_crop_status_raster <- function(crop_name,
                                         crop_status_df,
                                         algorithm,num_cores,file_format,out_dir,out_suffix){
   #
-  # CREATED: 
+  # CREATED: 10
   # MODIFIED:
   # AUTHORS: Benoit Parmentier
   #
