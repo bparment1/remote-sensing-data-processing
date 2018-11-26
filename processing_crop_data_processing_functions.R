@@ -217,10 +217,11 @@ generate_crop_status_raster <- function(crop_name,
                                         in_filename_raster,
                                         region_name,
                                         crop_status_df,
+                                        legend_df,
                                         algorithm,num_cores,file_format,out_dir,out_suffix){
   #
-  # CREATED: 10
-  # MODIFIED:
+  # CREATED: 10/22/2018
+  # MODIFIED: 11/26/2018
   # AUTHORS: Benoit Parmentier
   #
   # This function generates crop raster status for a given region (state).
@@ -231,16 +232,20 @@ generate_crop_status_raster <- function(crop_name,
   # 3=harvesting active
   # 4=harvesting intense
   #
+  # The input layers are from the cropscape project:
+  # https://nassgeodata.gmu.edu/CropScape/
+  #
   #INPUTS:
   #1) crop_name: name of crop (check in fiel provided)
   #2) in_filename_raster: input raster file name
   #3) region_name: relevant region name (state in this case)
   #4) crop_status_df: input file containing crop status: 0,1,2,3,4
-  #5) algorithm: GDAL or R, use GDAL for larger images
-  #6) num_cores: default is 1
-  #7) file_format:default value is ".tif"
-  #8) out_dir: output dir
-  #9) out_suffix: suffix added to filename
+  #5) legend_df: legend from crop raster
+  #6) algorithm: GDAL or R, use GDAL for larger images
+  #7) num_cores: default is 1
+  #8) file_format:default value is ".tif"
+  #9) out_dir: output dir
+  #10) out_suffix: suffix added to filename
   #OUTPUTS
   #Data frame:
   #1) out_df: data.frame containing output raster name and status
