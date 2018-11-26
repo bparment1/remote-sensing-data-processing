@@ -137,21 +137,17 @@ recode_crop <- function(crop_type,data_crop){
   return(obj)
 }
 
-reclassify_raster <- function(j,crop_status_df,in_filename,algorithm,file_format){
-  #
-  # 
-  # CREATED: 10/22/2018
-  # MODIFIED: 11/26/2018
-  # AUTHORS: Benoit Parmentier
-  #
-  #This function reclassifies a raster into a specific class given data.frame of input.
+reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_format,out_dir,out_suffix){
+  # This function reclassifies a raster into a specific class given data.frame of input.
   # The goal is to generate one raster for every week in a year.
   #
   #INPUTS:
   #1) j: week considered from 1 to 52
   #2) crop_status_df: input file containing crop status: 0,1,2,3,4
-  #3)
-  #4) algorithm: GDAL or R, use GDAL for larger images
+  #3) val:
+  #4) in_filename:
+  #5) algorithm: GDAL or R, use GDAL for larger images
+  #6) file_format
   #OUTPUTS
   #
   
@@ -178,18 +174,18 @@ reclassify_raster <- function(j,crop_status_df,in_filename,algorithm,file_format
       #gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="0*(A<3)" --calc="1*(A>3)"
       #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
       #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
-      out_filename <- paste0(region_name,"_",crop_name,"_","week_",j,file_format)
+      
+      out_filename <- paste0(region_name,"_",crop_name,"_",val,"_week_",j,out_suffix,file_format)
       
       gdal_command <- paste0("gdal_calc.py",
                              " -A ",in_filename,
-                             " --outfile=",out_filename,
+                             " --outfile=",file.path(out_dir,out_filename),
                              " --calc=",paste0("'(",val_to_code,"*(A==",val,"))'"),
                              " --overwrite")
       
       gdal_command
       system(gdal_command)
-      #r<- raster(out_filename)
-      
+
     }
     
   }else{
@@ -286,11 +282,11 @@ generate_crop_status_raster <- function(crop_name,
   j <- 1
   #debug(reclassify_raster)
   
-  #test_obj <- reclassify_raster(15,
-  #                     crop_status=crop_status_df,
-  #                     in_filename=file.path(out_dir,crop_out_filename),
-  #                     algorithm="GDAL",
-  #                    file_format=file_format)
+  test_obj <- reclassify_raster(15,
+                       crop_status=crop_status_df,
+                       in_filename=file.path(out_dir,crop_out_filename),
+                       algorithm="GDAL",
+                       file_format=file_format)
   
   list_obj <- mclapply(1:52,
                        FUN=reclassify_raster,
