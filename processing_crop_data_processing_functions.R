@@ -137,8 +137,14 @@ recode_crop <- function(crop_type,data_crop){
   return(obj)
 }
 
-reclassify_raster <- function(j,crop_status,in_filename,algorithm,file_format){
-  # This function reclassifies a raster into a specific class given data.frame of input.
+reclassify_raster <- function(j,crop_status_df,in_filename,algorithm,file_format){
+  #
+  # 
+  # CREATED: 10/22/2018
+  # MODIFIED: 11/26/2018
+  # AUTHORS: Benoit Parmentier
+  #
+  #This function reclassifies a raster into a specific class given data.frame of input.
   # The goal is to generate one raster for every week in a year.
   #
   #INPUTS:
@@ -218,7 +224,11 @@ generate_crop_status_raster <- function(crop_name,
                                         region_name,
                                         crop_status_df,
                                         legend_df,
-                                        algorithm,num_cores,file_format,out_dir,out_suffix){
+                                        algorithm,
+                                        num_cores,
+                                        file_format,
+                                        out_dir,
+                                        out_suffix){
   #
   # CREATED: 10/22/2018
   # MODIFIED: 11/26/2018
@@ -260,6 +270,10 @@ generate_crop_status_raster <- function(crop_name,
   r_region <- raster(file.path(in_dir,in_filename_raster))
   r_val <- r_region
   
+  ## crop value in the cropscape product
+  val <- legend_df[legend_df$CLASS_NAME==crop_name,]$VALUE
+  
+  #### This can be changed to gdal_calc later
   fun <- function(x) { x[x!=val] <- NA; return(x) }
   r_val <- calc(r_val, fun)
   crop_out_filename <- paste0(crop_name,"_",val,file_format)
@@ -280,7 +294,7 @@ generate_crop_status_raster <- function(crop_name,
   
   list_obj <- mclapply(1:52,
                        FUN=reclassify_raster,
-                       crop_status=crop_status,
+                       crop_status=crop_status_df,
                        in_filename=file.path(out_dir,crop_out_filename),
                        algorithm="GDAL",
                        file_format=file_format,
@@ -307,4 +321,4 @@ generate_crop_status_raster <- function(crop_name,
    return(out_df)
 }
 
-###########################  End of script
+#############################  End of script ####################################
