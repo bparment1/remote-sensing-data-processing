@@ -3,14 +3,14 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 11/26/2018
+## DATE MODIFIED: 11/27/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
 ## ISSUE: 
 ## TO DO:
 ##
-## COMMIT: missing input parameters for crop generation
+## COMMIT: fixing output name problem and test over two crops
 ##
 
 #### Instructions:
@@ -109,7 +109,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_11262018d.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_11272018.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -127,7 +127,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 6
-out_suffix <-"agbirds_processing_11262018" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_11272018" #output suffix for the files and ouptut folder
 #ARGS 7
 num_cores <- 2 # number of cores
 #ARGS 8
@@ -279,34 +279,47 @@ if(!is.null(crop_name)){
                                       out_suffix)
 }else{
   
-  
   i <- 1
   crop_name <- legend_df_subset$CLASS_NAME
   
   #undebug(generate_crop_status_raster)
-  test <- generate_crop_status_raster(crop_name[i],
-                                             in_filename_raster,
-                                             region_name,
-                                             data_screened_df,
-                                             legend_df=legend_df_subset,
-                                             algorithm,
-                                             num_cores,
-                                             file_format,
-                                             out_dir,
-                                             out_suffix)
+  #test <- generate_crop_status_raster(crop_name[i],
+  #                                           in_filename_raster,
+  #                                           region_name,
+  #                                           data_screened_df,
+  #                                           legend_df=legend_df_subset,
+  #                                           algorithm,
+  #                                           num_cores,
+  #                                           file_format,
+  #                                           out_dir,
+  #                                           out_suffix)
   #
   
-  list_out_df <- lapply(crop_name[1:2],
+  #list_out_df <- lapply(crop_name[1:2],
+  #                      FUN=generate_crop_status_raster,
+  #                      in_filename_raster,
+  #                      region_name,
+  #                      data_screened_df,
+  #                      legend_df=legend_df_subset,
+  #                      algorithm,
+  #                      num_cores,
+  #                      file_format,
+  #                      out_dir,
+  #                      out_suffix)
+  list_out_df <- mclapply(crop_name,
                         FUN=generate_crop_status_raster,
                         in_filename_raster,
                         region_name,
                         data_screened_df,
                         legend_df=legend_df_subset,
                         algorithm,
-                        num_cores,
-                        file_format,
+                        num_cores,#set the cores here
+                        file_format, 
                         out_dir,
-                        out_suffix)
+                        out_suffix,
+                        mc.cores = 1,
+                        mc.preschedule = FALSE)
+  
   
 }
 
