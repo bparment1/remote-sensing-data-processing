@@ -133,11 +133,11 @@ recode_crop <- function(crop_type,data_crop){
   
   obj <- list(val_tabs,range_df,data_out)
   names(obj) <- c("val_tabs","range_df","data_out")
-  
+
   return(obj)
 }
 
-reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_format,out_dir,out_suffix){
+reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_format,out_dir=NULL,out_suffix=NULL){
   # This function reclassifies a raster into a specific class given data.frame of input.
   # The goal is to generate one raster for every week in a year.
   #
@@ -149,7 +149,17 @@ reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_fo
   #5) algorithm: GDAL or R, use GDAL for larger images
   #6) file_format
   #OUTPUTS
-  #
+  # 1) obj_out: list made of two components: 
+  # out_filename: output file for reclassified crop status
+  # gdal_command: gdal command used in the reclassification, NULL if R is used
+  
+  ######### Begin script ######
+  
+  if(is.null(out_suffix)){
+    out_suffix=""
+  }else{
+    out_suffix=paste0("_",out_suffix)
+  }
   
   col_val <- paste0("X",j) # week
   
@@ -176,10 +186,13 @@ reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_fo
       #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
       
       out_filename <- paste0(region_name,"_",crop_name,"_",val,"_week_",j,out_suffix,file_format)
+      if(!is.null(out_dir)){
+        out_filename <- file.path(out_dir,out_filename)
+      }
       
       gdal_command <- paste0("gdal_calc.py",
                              " -A ",in_filename,
-                             " --outfile=",file.path(out_dir,out_filename),
+                             " --outfile=",out_filename,
                              " --calc=",paste0("'(",val_to_code,"*(A==",val,"))'"),
                              " --overwrite")
       
@@ -195,6 +208,7 @@ reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_fo
   
   obj_out <- list(out_filename,gdal_command)
   names(obj_out) <- c("out_filename","gdal_command")
+  #class(obj_out) <- append(class(obj_out),"reclassify_cropscape")
   
   return(obj_out)
 }
@@ -282,18 +296,24 @@ generate_crop_status_raster <- function(crop_name,
   j <- 1
   #debug(reclassify_raster)
   
-  test_obj <- reclassify_raster(15,
-                       crop_status=crop_status_df,
-                       in_filename=file.path(out_dir,crop_out_filename),
-                       algorithm="GDAL",
-                       file_format=file_format)
+  #test_obj <- reclassify_raster(15,
+  #                     crop_status=crop_status_df,
+  #                     val=val,
+  #                     in_filename=file.path(out_dir,crop_out_filename),
+  #                     algorithm="GDAL",
+  #                     file_format=file_format,
+  #                     out_dir=out_dir,
+  #                     out_suffix=NULL)
   
   list_obj <- mclapply(1:52,
                        FUN=reclassify_raster,
                        crop_status=crop_status_df,
+                       val=val,
                        in_filename=file.path(out_dir,crop_out_filename),
                        algorithm="GDAL",
                        file_format=file_format,
+                       out_dir=out_dir,
+                       out_suffix=NULL,
                        mc.cores = num_cores,
                        mc.preschedule = FALSE)
    #browser()
@@ -302,6 +322,10 @@ generate_crop_status_raster <- function(crop_name,
    out_df <- do.call(rbind,rows_out_df)
    #View(out_df)
    
+   #Browse[2]> out_df$status <- rowSums(crop_df)
+   #Error in `$<-.data.frame`(`*tmp*`, status, value = c(0, 0, 0, 0, 0, 0,  : 
+   #                                                        replacement has 52 rows, data has 144
+   
    n_col <- ncol(crop_status_df)
    crop_df <- t(crop_status_df[,-c(1,2,3,n_col)])
    out_df$status <- rowSums(crop_df)
@@ -309,7 +333,7 @@ generate_crop_status_raster <- function(crop_name,
    out_df$region <- region_name
    out_df$crop_name <- crop_name
    
-   barplot(out_df$status,names=1:52)
+   out_df$val <- val #crop id in cropscale layer
    
    out_filename_df <- paste0("output_df_",region_name,"_",crop_name,"_",out_suffix,".txt")
    write.table(out_df,out_filename_df)
