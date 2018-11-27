@@ -266,7 +266,7 @@ region_name <- state_val
 
 if(!is.null(crop_name)){
   #undebug(generate_crop_status_raster)
-  
+  ## Takes about 10 minutes for Cotton in Alabama
   list_out_df <- generate_crop_status_raster(crop_name,
                                       in_filename_raster,
                                       region_name,
@@ -285,30 +285,33 @@ if(!is.null(crop_name)){
   
   #undebug(generate_crop_status_raster)
   test <- generate_crop_status_raster(crop_name[i],
-                                      in_filename_raster,
-                                      region_name,
-                                      data_screened_df,
-                                      legend_df=legend_df_subset,
-                                      algorithm,
-                                      num_cores,
-                                      file_format,
-                                      out_dir,
-                                      out_suffix)
+                                             in_filename_raster,
+                                             region_name,
+                                             data_screened_df,
+                                             legend_df=legend_df_subset,
+                                             algorithm,
+                                             num_cores,
+                                             file_format,
+                                             out_dir,
+                                             out_suffix)
   #
   
-  list_out_df <- lapply(crop_name,
+  list_out_df <- lapply(crop_name[1:2],
                         FUN=generate_crop_status_raster,
-                        in_filename_raster=in_filename_raster,
-                        region_name=region_name,
-                        crop_status_df=data_screened_df,
-                        algorithm=algorithm,
-                        num_cores=num_cores,
-                        file_format=file_format,
-                        out_dir=out_dir,
-                        out_suffix=out_suffix)
+                        in_filename_raster,
+                        region_name,
+                        data_screened_df,
+                        legend_df=legend_df_subset,
+                        algorithm,
+                        num_cores,
+                        file_format,
+                        out_dir,
+                        out_suffix)
+  
 }
 
 ### let's report on the output created
+barplot(out_df$status,names=1:52)
 
 
 #####################  End of script ###############################
