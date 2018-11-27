@@ -296,14 +296,14 @@ generate_crop_status_raster <- function(crop_name,
   j <- 1
   #debug(reclassify_raster)
   
-  #test_obj <- reclassify_raster(15,
-  #                     crop_status=crop_status_df,
-  #                     val=val,
-  #                     in_filename=file.path(out_dir,crop_out_filename),
-  #                     algorithm="GDAL",
-  #                     file_format=file_format,
-  #                     out_dir=out_dir,
-  #                     out_suffix=NULL)
+  test_obj <- reclassify_raster(15,
+                       crop_status=crop_status_df,
+                       val=val,
+                       in_filename=file.path(out_dir,crop_out_filename),
+                       algorithm="GDAL",
+                       file_format=file_format,
+                       out_dir=out_dir,
+                       out_suffix=NULL)
   
   list_obj <- mclapply(1:52,
                        FUN=reclassify_raster,
@@ -320,6 +320,7 @@ generate_crop_status_raster <- function(crop_name,
 
    rows_out_df <- lapply(list_obj,FUN=extract_outputs)
    out_df <- do.call(rbind,rows_out_df)
+   
    #View(out_df)
    
    #Browse[2]> out_df$status <- rowSums(crop_df)
