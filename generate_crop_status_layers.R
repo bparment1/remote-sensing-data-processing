@@ -109,7 +109,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_11262018b.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_11262018d.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -308,6 +308,7 @@ if(!is.null(crop_name)){
                         out_suffix=out_suffix)
 }
 
+### let's report on the output created
 
 
 #####################  End of script ###############################
