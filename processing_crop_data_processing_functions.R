@@ -3,14 +3,14 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 11/21/2018
+## DATE MODIFIED: 11/27/2018
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
 ## ISSUE: 
 ## TO DO:
 ##
-## COMMIT: clean up of code
+## COMMIT: fix output name problem
 ##
 
 ###################################################
@@ -144,7 +144,7 @@ reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_fo
   #INPUTS:
   #1) j: week considered from 1 to 52
   #2) crop_status_df: input file containing crop status: 0,1,2,3,4
-  #3) val:
+  #3) val: value corresponding to specific crop and to be reclassified
   #4) in_filename:
   #5) algorithm: GDAL or R, use GDAL for larger images
   #6) file_format
@@ -164,6 +164,7 @@ reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_fo
   col_val <- paste0("X",j) # week
   
   val_to_code <- sum(crop_status_df[[col_val]]) #first value is planting, the other one is havesting
+  crop_name_processed <- unique(crop_status_df$Crop)
   
   if(val_to_code>0){
     if(algorithm=="R"){
@@ -185,7 +186,7 @@ reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_fo
       #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
       #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
       
-      out_filename <- paste0(region_name,"_",crop_name,"_",val,"_week_",j,out_suffix,file_format)
+      out_filename <- paste0(region_name,"_",crop_name_processed,"_",val,"_week_",j,out_suffix,file_format)
       if(!is.null(out_dir)){
         out_filename <- file.path(out_dir,out_filename)
       }
@@ -241,7 +242,7 @@ generate_crop_status_raster <- function(crop_name,
                                         out_suffix){
   #
   # CREATED: 10/22/2018
-  # MODIFIED: 11/26/2018
+  # MODIFIED: 11/27/2018
   # AUTHORS: Benoit Parmentier
   #
   # This function generates crop raster status for a given region (state).
