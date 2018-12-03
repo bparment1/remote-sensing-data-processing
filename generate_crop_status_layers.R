@@ -127,7 +127,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 6
-out_suffix <-"agbirds_processing_11272018" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_12032018" #output suffix for the files and ouptut folder
 #ARGS 7
 num_cores <- 2 # number of cores
 #ARGS 8
@@ -139,6 +139,9 @@ state_val <- "Alabama"
 #ARGS 11
 #crop_name <- NULL #if NULL run for all crop in the given state
 crop_name <- "Cotton"
+## 
+regions_infile <- "cb_2016_us_state_500k.shp"
+
 
 ##### Constant:
 
@@ -170,6 +173,8 @@ if(create_out_dir_param==TRUE){
 #######################################
 ### PART 1: Read in DATA #######
 
+regions_sf <- st_read(file.path(in_dir,regions_infile))
+plot(regions_sf$geometry)
 
 data_df <- read.table(file.path(in_dir,in_filename),
                       sep=",",
