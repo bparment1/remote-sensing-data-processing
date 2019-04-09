@@ -225,6 +225,7 @@ list_crop_status_obj <- mclapply(list_states,
          mc.cores= num_cores)
 
 list_summary_crop <- vector("list",length=length(list_crop_status_obj))
+
 for(i in 1:length(list_crop_status_obj)){
   list_data_out <- lapply(list_crop_status_obj[[i]],function(x){x$data_out})
   names(list_crop_status_obj[[1]])
