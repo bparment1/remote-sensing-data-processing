@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 11/27/2018
+## DATE MODIFIED: 04/09/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -109,7 +109,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_11272018.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_04092019.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -127,11 +127,12 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 6
-out_suffix <-"agbirds_processing_12032018" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_04092019" #output suffix for the files and ouptut folder
 #ARGS 7
 num_cores <- 2 # number of cores
 #ARGS 8
 in_filename <- "Crop_Data_modified.csv"
+in_filename <- "Crop_Data_modified_AD4Benoit.csv"
 #ARGS 9
 in_filename_raster <- "cdl_alabama.tif"
 #ARGS 10
@@ -209,9 +210,9 @@ crop_status_obj <- screen_for_crop_status(state_val,data_in)
 length(crop_status_obj)
 names(crop_status_obj)
 
-crop_status_obj$Corn_Grain
-crop_status_obj$Corn_Grain
-crop_status_obj$Corn_Grain$data_out
+#crop_status_obj$Corn_Grain
+#crop_status_obj$Corn_Grain
+crop_status_obj$Corn$data_out
 
 ### Now you can do this across all the states and have a summary
 
