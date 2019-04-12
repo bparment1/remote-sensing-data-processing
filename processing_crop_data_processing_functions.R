@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 11/27/2018
+## DATE MODIFIED: 04/12/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
@@ -342,5 +342,12 @@ generate_crop_status_raster <- function(crop_name,
    
    return(out_df)
 }
+
+extract_from_crop_status_obj <- function(crop_status_obj){
+  #crop_status_obj[[1]]
+  list_data_out_val <- lapply(1:length(crop_status_obj),function(i){try(crop_status_obj[[i]]$data_out)})
+  return(list_data_out_val)
+}
+
 
 #############################  End of script ####################################
