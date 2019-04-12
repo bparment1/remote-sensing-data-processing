@@ -109,7 +109,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_04092019.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_04122019.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -236,11 +236,6 @@ for(i in 1:length(list_crop_status_obj)){
   
   list_data_out <- extract_from_crop_status_obj(crop_status_obj)
                        
-  extract_from_crop_status_obj <- function(crop_status_obj){
-    #crop_status_obj[[1]]
-    list_data_out_val <- lapply(1:length(crop_status_obj),function(i){try(crop_status_obj[[i]]$data_out)})
-    return(list_data_out_val)
-  }
   names(list_crop_status_obj[[1]])
   #combine data_out
   data_species_df <- do.call(rbind,list_data_out)
