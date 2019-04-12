@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 04/09/2019
+## DATE MODIFIED: 04/12/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -131,8 +131,8 @@ out_suffix <-"agbirds_processing_04092019" #output suffix for the files and oupt
 #ARGS 7
 num_cores <- 2 # number of cores
 #ARGS 8
-in_filename <- "Crop_Data_modified.csv"
-in_filename <- "Crop_Data_modified_AD4Benoit.csv"
+#in_filename <- "Crop_Data_modified.csv"
+in_filename <- "Crop_Data_modified_AD4Benoit.csv" #updated names
 #ARGS 9
 in_filename_raster <- "cdl_alabama.tif"
 #ARGS 10
@@ -212,11 +212,12 @@ names(crop_status_obj)
 
 #crop_status_obj$Corn_Grain
 #crop_status_obj$Corn_Grain
-crop_status_obj$Corn$data_out
+crop_status_obj[[1]]
 
 ### Now you can do this across all the states and have a summary
 
 list_states <- unique(data_in$State)
+#note that New England is listed as state: "New England 1/"
 
 list_crop_status_obj <- mclapply(list_states,
          FUN=screen_for_crop_status,
@@ -227,7 +228,18 @@ list_crop_status_obj <- mclapply(list_states,
 list_summary_crop <- vector("list",length=length(list_crop_status_obj))
 
 for(i in 1:length(list_crop_status_obj)){
-  list_data_out <- lapply(list_crop_status_obj[[i]],function(x){x$data_out})
+  crop_status_obj <- list_crop_status_obj[[i]]
+  
+  #list_data_out <- lapply(list_crop_status_obj[[i]],
+  #                        function(x){try(lapply(z,function(z){(z$data_out)}),x=z}))
+  
+  list_data_out <- extract_from_crop_status_obj(crop_status_obj)
+                       
+  extract_from_crop_status_obj <- function(crop_status_obj){
+    #crop_status_obj[[1]]
+    list_data_out_val <- lapply(1:length(crop_status_obj),function(i){try(crop_status_obj[[i]]$data_out)})
+    return(list_data_out)
+  }
   names(list_crop_status_obj[[1]])
   #combine data_out
   data_species_df <- do.call(rbind,list_data_out)
@@ -329,6 +341,7 @@ if(!is.null(crop_name)){
   
   
 }
+
 
 ### let's report on the output created
 barplot(out_df$status,names=1:52)
