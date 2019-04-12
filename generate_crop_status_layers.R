@@ -232,13 +232,14 @@ for(i in 1:length(list_crop_status_obj)){
   
   #list_data_out <- lapply(list_crop_status_obj[[i]],
   #                        function(x){try(lapply(z,function(z){(z$data_out)}),x=z}))
+  undebug(extract_from_crop_status_obj)
   
   list_data_out <- extract_from_crop_status_obj(crop_status_obj)
                        
   extract_from_crop_status_obj <- function(crop_status_obj){
     #crop_status_obj[[1]]
     list_data_out_val <- lapply(1:length(crop_status_obj),function(i){try(crop_status_obj[[i]]$data_out)})
-    return(list_data_out)
+    return(list_data_out_val)
   }
   names(list_crop_status_obj[[1]])
   #combine data_out
