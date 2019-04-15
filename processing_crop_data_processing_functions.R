@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 04/12/2019
+## DATE MODIFIED: 04/15/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
@@ -69,7 +69,7 @@ screen_for_crop_status <- function(state_val,data_in){
   #### Step 3: recode crop values for havesting
   
   #undebug(recode_crop)
-  obj_crop <- recode_crop(crop_type=crop_type[2],data_crop=data_subset)
+  obj_crop <- recode_crop(crop_type=crop_type[6],data_crop=data_subset)
   
   list_obj_crop <- mclapply(crop_type,
            FUN=recode_crop,
