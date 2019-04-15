@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 04/12/2019
+## DATE MODIFIED: 04/15/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -127,7 +127,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 6
-out_suffix <-"agbirds_processing_04092019" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_04152019" #output suffix for the files and ouptut folder
 #ARGS 7
 num_cores <- 2 # number of cores
 #ARGS 8
@@ -201,11 +201,22 @@ dim(data_in)
 #######################################
 ### PART 2: Screen status crop data #######
 
+### Dealing with duplicate rows
+test <- as.data.frame(table(data_in$State,data_in$Crop))
+selection_val <- test[test$Freq == 4,]
+
+#make a function:
+
+df_processed <- filter(data_in,State==selection_val[1,1] & Crop==selection_val[1,2] )
+#remove and insert back only the two rows
+
 ##### test the function:
 #undebug(screen_for_crop_status)
 state_val
 crop_status_obj <- screen_for_crop_status(state_val,data_in)
-  
+crop_status_obj <- screen_for_crop_status(list_states[1],data_in)
+
+table(data_in$State,data_in$Crop)
 ### Exploring to recombine values:
 length(crop_status_obj)
 names(crop_status_obj)
