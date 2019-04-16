@@ -109,7 +109,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_04162019.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_04162019b.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -213,7 +213,7 @@ dim(data_in)
 #undebug(screen_for_crop_status)
 state_val
 crop_status_obj <- screen_for_crop_status(state_val,data_in)
-#crop_status_obj <- screen_for_crop_status(list_states[1],data_in)
+crop_status_obj <- screen_for_crop_status(list_states[43],data_in)
 
 ### Exploring to recombine values:
 length(crop_status_obj)
@@ -241,11 +241,11 @@ for(i in 1:length(list_crop_status_obj)){
   
   #list_data_out <- lapply(list_crop_status_obj[[i]],
   #                        function(x){try(lapply(z,function(z){(z$data_out)}),x=z}))
-  undebug(extract_from_crop_status_obj)
+  #undebug(extract_from_crop_status_obj)
   
   list_data_out <- extract_from_crop_status_obj(crop_status_obj)
                        
-  names(list_crop_status_obj[[1]])
+  #names(list_crop_status_obj[[1]])
   #combine data_out
   data_species_df <- do.call(rbind,list_data_out)
   
