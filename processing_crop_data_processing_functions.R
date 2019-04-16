@@ -349,5 +349,23 @@ extract_from_crop_status_obj <- function(crop_status_obj){
   return(list_data_out_val)
 }
 
+remove_duplicates_fun <- function(df,selection_val){
+  
+  list_index_val <- lapply(1:nrow(selection_val),
+                           function(i){which(df$State==selection_val[i,1] & df$Crop==selection_val[i,2])})
+  
+  list_df_processed <- lapply(1:length(list_index_val),function(i){df[list_index_val[[i]],]})
+  ## Drop the last two rows:
+  list_df_processed_dropped <- lapply(list_df_processed,function(x){x[1:2,]})
+  df_processed_dropped <- do.call(rbind,list_df_processed_dropped)
+  
+  #remove duplicates
+  df <- df[- unlist(list_index_val),]
+  df <- rbind(df,df_processed_dropped)
+  #add back duplicates:
+  
+  #list(index_val)
+  return(df)
+}
 
 #############################  End of script ####################################
