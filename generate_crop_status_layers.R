@@ -109,7 +109,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_04122019.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_04162019.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -204,35 +204,17 @@ dim(data_in)
 ### Dealing with duplicate rows
 test <- as.data.frame(table(data_in$State,data_in$Crop))
 selection_val <- test[test$Freq == 4,]
-df <- data_in 
+#df <- data_in 
 
-#make a function:
-remove_duplicates_fun <- function(df,selection_val){
-  
-  list_index_val <- lapply(1:nrow(selection_val),
-                           function(i){which(df$State==selection_val[i,1] & df$Crop==selection_val[i,2])})
-  
-  list_df_processed <- lapply(1:length(list_index_val),function(i){df[list_index_val[[i]],]})
-  ## Drop the last two rows:
-  list_df_processed_dropped <- lapply(list_df_processed,function(x){x[1:2,]})
-  df_processed_dropped <- do.call(rbind,list_df_processed_dropped)
-  
-  #remove duplicates
-  df <- df[- unlist(list_index_val),]
-  df <- rbin(df,df_processed_dropped)
-  #add back duplicates:
-  
-  #list(index_val)
-  return(df)
-}
+data_in <- remove_duplicates_fun(data_in,selection_val)
+dim(data_in)
 
 ##### test the function:
 #undebug(screen_for_crop_status)
 state_val
 crop_status_obj <- screen_for_crop_status(state_val,data_in)
-crop_status_obj <- screen_for_crop_status(list_states[1],data_in)
+#crop_status_obj <- screen_for_crop_status(list_states[1],data_in)
 
-table(data_in$State,data_in$Crop)
 ### Exploring to recombine values:
 length(crop_status_obj)
 names(crop_status_obj)
