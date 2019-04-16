@@ -209,12 +209,21 @@ df <- data_in
 #make a function:
 remove_duplicates_fun <- function(df,selection_val){
   
-  df_processed <- filter(df,State==selection_val[1,1] & Crop==selection_val[1,2])
-  df_processed <- df_processed[1:2,]
-  #remove and insert back only the two rows
-  df <- df[!(df$State==selection_val[1,1] & df$Crop==selection_val[1,2]),]
+  list_index_val <- lapply(1:nrow(selection_val),
+                           function(i){which(df$State==selection_val[i,1] & df$Crop==selection_val[i,2])})
   
-  return()
+  list_df_processed <- lapply(1:length(list_index_val),function(i){df[list_index_val[[i]],]})
+  ## Drop the last two rows:
+  list_df_processed_dropped <- lapply(list_df_processed,function(x){x[1:2,]})
+  df_processed_dropped <- do.call(rbind,list_df_processed_dropped)
+  
+  #remove duplicates
+  df <- df[- unlist(list_index_val),]
+  df <- rbin(df,df_processed_dropped)
+  #add back duplicates:
+  
+  #list(index_val)
+  return(df)
 }
 
 ##### test the function:
