@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 04/15/2019
+## DATE MODIFIED: 04/16/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -204,11 +204,18 @@ dim(data_in)
 ### Dealing with duplicate rows
 test <- as.data.frame(table(data_in$State,data_in$Crop))
 selection_val <- test[test$Freq == 4,]
+df <- data_in 
 
 #make a function:
-
-df_processed <- filter(data_in,State==selection_val[1,1] & Crop==selection_val[1,2] )
-#remove and insert back only the two rows
+remove_duplicates_fun <- function(df,selection_val){
+  
+  df_processed <- filter(df,State==selection_val[1,1] & Crop==selection_val[1,2])
+  df_processed <- df_processed[1:2,]
+  #remove and insert back only the two rows
+  df <- df[!(df$State==selection_val[1,1] & df$Crop==selection_val[1,2]),]
+  
+  return()
+}
 
 ##### test the function:
 #undebug(screen_for_crop_status)
