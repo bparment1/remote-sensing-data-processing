@@ -136,10 +136,12 @@ in_filename <- "Crop_Data_modified_AD4Benoit.csv" #updated names
 #ARGS 9
 in_filename_raster <- "cdl_alabama.tif"
 #ARGS 10
-state_val <- "Alabama"
+state_val <- "Alabama" #if null should loop through?
+#state_val <- c("Alabama","South Dakota, "Nebraska,"Iowa")
+
 #ARGS 11
-#crop_name <- NULL #if NULL run for all crop in the given state
-crop_name <- "Cotton"
+crop_name <- NULL #if NULL run for all crop in the given states
+#crop_name <- "Cotton"
 ## 
 regions_infile <- "cb_2016_us_state_500k.shp"
 
