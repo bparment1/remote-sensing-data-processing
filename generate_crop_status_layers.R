@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 04/16/2019
+## DATE MODIFIED: 04/29/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -109,7 +109,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_04162019b.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_04292019.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -127,7 +127,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 6
-out_suffix <-"agbirds_processing_04152019" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_04292019" #output suffix for the files and ouptut folder
 #ARGS 7
 num_cores <- 2 # number of cores
 #ARGS 8
@@ -209,11 +209,21 @@ selection_val <- test[test$Freq == 4,]
 data_in <- remove_duplicates_fun(data_in,selection_val)
 dim(data_in)
 
+#### Fix naming in crops, remove space and /
+
+names(data_in)
+crop_val <- (data_in[['Crop']])
+crop_val <- as.character(gsub(" ","_",crop_val))
+crop_val <- as.character(gsub("\\/","_",crop_val))
+table(crop_val)
+
+data_in[['Crop']] <- crop_val
+
 ##### test the function:
 #undebug(screen_for_crop_status)
 state_val
 crop_status_obj <- screen_for_crop_status(state_val,data_in)
-crop_status_obj <- screen_for_crop_status(list_states[43],data_in)
+#crop_status_obj <- screen_for_crop_status(list_states[43],data_in)
 
 ### Exploring to recombine values:
 length(crop_status_obj)
