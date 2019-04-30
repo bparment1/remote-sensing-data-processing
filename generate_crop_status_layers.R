@@ -363,5 +363,87 @@ if(!is.null(crop_name)){
 ### let's report on the output created
 barplot(out_df$status,names=1:52)
 
+############
+### Testing mutliband merging of bands:
+
+#gdalwarp Alabama*.tif test.tif
+#gdalwarp --config GDAL_CACHEMAX 3000 -wm 3000 $(list_of_tiffs) merged.tiff
+
+#gdal_merg.py -o alabama_multiband.tif -separate Alabama_Cotton_2_week_14.tif Alabama_Cotton_2_week_15.tif
+
+from osgeo import gdal, osr
+import numpy
+
+# Define output image name, size and projection info:
+OutputImage = 'test.tif'
+SizeX = 20
+SizeY = 20
+CellSize = 1
+X_Min = 563220.0
+Y_Max = 699110.0
+N_Bands = 10
+srs = osr.SpatialReference()
+srs.ImportFromEPSG(2157)
+srs = srs.ExportToWkt()
+GeoTransform = (X_Min, CellSize, 0, Y_Max, 0, -CellSize)
+
+# Create the output image:
+Driver = gdal.GetDriverByName('GTiff')
+Raster = Driver.Create(OutputImage, SizeX, SizeY, N_Bands, 2) # Datatype = 2 same as gdal.GDT_UInt16
+Raster.SetProjection(srs)
+Raster.SetGeoTransform(GeoTransform)
+
+# Iterate over each band
+for band in range(N_Bands):
+  BandNumber = band + 1
+BandName = 'SomeBandName '+ str(BandNumber).zfill(3)
+RasterBand = Raster.GetRasterBand(BandNumber)
+
+# Iterate over each band
+for band in range(N_Bands):
+  BandNumber = band + 1
+BandName = 'SomeBandName '+ str(BandNumber).zfill(3)
+RasterBand = Raster.GetRasterBand(BandNumber)
+RasterBand.SetNoDataValue(0)
+RasterBand.SetDescription(BandName) # This sets the band name!
+RasterBand.WriteArray(numpy.ones((SizeX, SizeY)))
+
+# close the output image
+Raster = None
+print("Done.")
+
+#https://gis.stackexchange.com/questions/290796/how-to-edit-the-metadata-for-individual-bands-of-a-multiband-raster-preferably
+
+"""
+Set Band descriptions
+Usage:
+    python set_band_desc.py /path/to/file.ext band desc [band desc...]
+Where:
+    band = band number to set (starting from 1)
+    desc = band description string (enclose in "double quotes" if it contains spaces)
+Example:
+    python set_band_desc.py /path/to/dem.tif 1 "Band 1 desc"  2 "Band 2 desc"  3 "Band 3 desc"
+
+"""
+import sys
+from osgeo import gdal
+
+def set_band_descriptions(filepath, bands):
+  """
+    filepath: path/virtual path/uri to raster
+    bands:    ((band, description), (band, description),...)
+    """
+ds = gdal.Open(filepath, gdal.GA_Update)
+for band, desc in bands:
+  rb = ds.GetRasterBand(band)
+rb.SetDescription(desc)
+del ds
+
+if __name__ == '__main__':
+  filepath = sys.argv[1]
+bands = [int(i) for i in sys.argv[2::2]]
+names = sys.argv[3::2]
+set_band_descriptions(filepath, zip(bands, names))
+
 
 #####################  End of script ###############################
