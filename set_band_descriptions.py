@@ -9,13 +9,15 @@ Where:
     desc = band description string (enclose in "double quotes" if it contains spaces)
 Example:
     python set_band_desc.py /path/to/dem.tif 1 "Band 1 desc"  2 "Band 2 desc"  3 "Band 3 desc"
+    
+    python set_band_description.py ./test.tif 1 "week_14_Alabama" 2 "week_15_Alabama" 3 "week_16_Alabama"
 
 """
 import sys
 from osgeo import gdal
 
 def set_band_descriptions(filepath, bands):
-  
+    
     """
     filepath: path/virtual path/uri to raster
     bands:    ((band, description), (band, description),...)
@@ -27,7 +29,10 @@ def set_band_descriptions(filepath, bands):
     del ds
 
 if __name__ == '__main__':
-  filepath = sys.argv[1]
-  bands = [int(i) for i in sys.argv[2::2]]
-  names = sys.argv[3::2]
-  set_band_descriptions(filepath, zip(bands, names))
+    filepath = sys.argv[1]
+    bands = [int(i) for i in sys.argv[2::2]]
+    names = sys.argv[3::2]
+    set_band_descriptions(filepath, zip(bands, names))
+
+
+#filepath="/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/ttest.tif"
