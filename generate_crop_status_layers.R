@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 04/29/2019
+## DATE MODIFIED: 05/06/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -373,9 +373,25 @@ barplot(out_df$status,names=1:52)
 #lf=$(lf -v Alabama_Cotton_2_week_*.tif)
 #gdal_merg.py -o test_multiband.tif -separate $lf
 
-system(python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py test.tif 1 week_14 2 week_15 3 week_16)
-system(paste('/home/anaconda3/bin/python','home/Desktop/myfile.py',NCORE))
+system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py test.tif 1 'week_14' 2 'week_15' 3 'week_16'")
+#system(paste('/home/anaconda3/bin/python','home/Desktop/myfile.py',NCORE))
 
+## add function:
+
+generate_multiband <- function(infile_names, band_names, out_filename){
+  
+  system("gdal_merg.py -o test_multiband.tif -separate $lf")
+  #
+  #gdal_merg.py -o alabama_multiband.tif -separate Alabama_Cotton_2_week_14.tif Alabama_Cotton_2_week_15.tif
+  #lf=$(lf -v Alabama_Cotton_2_week_*.tif)
+  #gdal_merg.py -o test_multiband.tif -separate $lf
+  
+  
+  system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py test.tif 1 'week_14' 2 'week_15' 3 'week_16'")
+  
+  
+  #
+}
 
 
 #####################  End of script ###############################
