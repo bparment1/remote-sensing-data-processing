@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 05/06/2019
+## DATE MODIFIED: 05/07/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -109,7 +109,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_04292019.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_05072019.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -127,23 +127,23 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 6
-out_suffix <-"agbirds_processing_04292019" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_05072019" #output suffix for the files and ouptut folder
 #ARGS 7
 num_cores <- 2 # number of cores
 #ARGS 8
 #in_filename <- "Crop_Data_modified.csv"
 in_filename <- "Crop_Data_modified_AD4Benoit.csv" #updated names
 #ARGS 9
-in_filename_raster <- "cdl_alabama.tif"
+in_filename_raster <- "cdl_alabama.tif" #this should be the general image for the whole US
 #ARGS 10
 state_val <- "Alabama" #if null should loop through?
-#state_val <- c("Alabama","South Dakota, "Nebraska,"Iowa")
+#state_val <- c("Alabama","South Dakota, "Nebraska,"Iowa") #should go on a node
 
 #ARGS 11
-crop_name <- NULL #if NULL run for all crop in the given states
+crop_name <- NULL #if NULL run for all crops in the given state(s)
 #crop_name <- "Cotton"
 ## 
-regions_infile <- "cb_2016_us_state_500k.shp"
+regions_infile <- "cb_2016_us_state_500k.shp" #states
 
 
 ##### Constant:
@@ -174,15 +174,21 @@ if(create_out_dir_param==TRUE){
 }
 
 #######################################
-### PART 1: Read in DATA #######
+### PART 1: Read in DATA and crop to area of interest #######
 
 regions_sf <- st_read(file.path(in_dir,regions_infile))
 plot(regions_sf$geometry)
+
+### This is where you crop the cropscape product:
+
+#### end of crop in
+
 
 data_df <- read.table(file.path(in_dir,in_filename),
                       sep=",",
                       header=T,
                       stringsAsFactors = F)
+
 
 
 ### First clean up before setting up the coding:
@@ -301,6 +307,7 @@ legend_df_subset <- subset(legend_df,CLASS_NAME%in% common_crop_list)
 region_name <- state_val
 
 if(!is.null(crop_name)){
+  
   #undebug(generate_crop_status_raster)
   ## Takes about 10 minutes for Cotton in Alabama
   list_out_df <- generate_crop_status_raster(crop_name,
@@ -361,10 +368,14 @@ if(!is.null(crop_name)){
 
 
 ### let's report on the output created
-barplot(out_df$status,names=1:52)
+names(list_out_df[[1]])
+list_out_df[[1]]$crop_name
+barplot(list_out_df[[1]]$status,
+        names=1:52,
+        main=unique(list_out_df[[1]]$crop_name))
 
-############
-### Testing mutliband merging of bands:
+###############################################
+########### PART 5: Mutliband merging of bands and adding description
 
 #gdalwarp Alabama*.tif test.tif
 #gdalwarp --config GDAL_CACHEMAX 3000 -wm 3000 $(list_of_tiffs) merged.tiff
