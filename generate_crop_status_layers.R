@@ -374,6 +374,13 @@ barplot(list_out_df[[1]]$status,
         names=1:52,
         main=unique(list_out_df[[1]]$crop_name))
 
+# The status of crops by pixel is based on four categories:
+# 0=not active
+# 1=planting active
+# 2=planting intense
+# 3=harvesting active
+# 4=harvesting intense
+
 ###############################################
 ########### PART 5: Mutliband merging of bands and adding description
 
@@ -388,9 +395,33 @@ system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band
 #system(paste('/home/anaconda3/bin/python','home/Desktop/myfile.py',NCORE))
 
 ## add function:
+infile_names <- as.character(na.omit(list_out_df[[1]]$filename))
+out_filename <- "test.tif"
 
-generate_multiband <- function(infile_names, band_names, out_filename){
-  
+
+
+generate_multiband <- function(infile_names, band_names, out_filename,
+                               python_bin="/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py"){
+   
+    if(is.null(out_filename)){
+      out_filename <- paste0(region_name,"_",crop_name_processed,"_",val,"_week_",j,out_suffix,file_format)
+    }  
+    
+    #if(!is.null(out_dir)){
+    #  out_filename <- file.path(out_dir,out_filename)
+    #}
+    
+    list_files_vector <- paste(infile_names,collapse = " ")
+      
+    #gdal_merg.py -o test_multiband.tif -separate $lf
+    
+    gdal_command <- paste0("gdal_merge.py",
+                           " -o ",out_filename,
+                           " -separate ",list_files_vector)
+    
+    gdal_command
+    system(gdal_command)
+    
   system("gdal_merg.py -o test_multiband.tif -separate $lf")
   #
   #gdal_merg.py -o alabama_multiband.tif -separate Alabama_Cotton_2_week_14.tif Alabama_Cotton_2_week_15.tif
