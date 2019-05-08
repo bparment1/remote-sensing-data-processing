@@ -402,6 +402,7 @@ out_filename <- "test.tif"
 band_names <- (basename(infile_names))
 band_names <- gsub(extension(band_names),"",band_names)
 
+python_bin <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py"
 ### Need to change data type from Float32 to byte!!!
 ### Also need to compress.
 ### Add dates??
@@ -431,6 +432,10 @@ generate_multiband <- function(infile_names, band_names, out_filename,
   gdal_command
   system(gdal_command)
   
+  
+  band_val <- paste(1:length(band_names),shQuote(band_names)) 
+  band_val <- paste(band_val,collapse=" ")
+                    
   system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py test.tif 1 'week_14' 2 'week_15' 3 'week_16'")
   
   if(extension(out_filename)==".tif"){
@@ -438,9 +443,9 @@ generate_multiband <- function(infile_names, band_names, out_filename,
     #system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py test.tif 1 'week_14' 2 'week_15' 3 'week_16'")
     
     band_description_command <- paste0("python ",
-                                       "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py",
-                                       out_filename, #this is the file to update
-                                       "1 'week_14' 2 'week_15' 3 'week_16'")
+                                       python_bin," ",
+                                       out_filename," ", #this is the file to update
+                                       band_val)
     system(band_description_command)
   }
   
