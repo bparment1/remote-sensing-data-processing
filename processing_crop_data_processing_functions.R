@@ -370,6 +370,7 @@ remove_duplicates_fun <- function(df,selection_val){
   return(df)
 }
 
+## Generate mulitband files from input tif and record band names in description field
 generate_multiband <- function(infile_names, band_names, out_filename,
                                python_bin="/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py"){
   ## Function to merge separate image files in a multiband file
@@ -410,11 +411,10 @@ generate_multiband <- function(infile_names, band_names, out_filename,
     system(band_description_command)
   }
   
-  #
-  obj_out <- list(out_filename,gdal_command)
-  names(obj_out) <- c("out_filename","gdal_command")
-  #class(obj_out) <- append(class(obj_out),"reclassify_cropscape")
-  
+  # Prepare output object
+  obj_out <- list(out_filename,gdal_command,band_description_command)
+  names(obj_out) <- c("out_filename","gdal_command",band_description_command)
+
   return(obj_out)
 }
 
