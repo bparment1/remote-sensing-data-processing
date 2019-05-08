@@ -363,7 +363,6 @@ if(!is.null(crop_name)){
                         mc.cores = 1,
                         mc.preschedule = FALSE)
   
-  
 }
 
 
@@ -373,6 +372,8 @@ list_out_df[[1]]$crop_name
 barplot(list_out_df[[1]]$status,
         names=1:52,
         main=unique(list_out_df[[1]]$crop_name))
+
+out_df <- list_out_df[[1]]
 
 # The status of crops by pixel is based on four categories:
 # 0=not active
@@ -398,41 +399,57 @@ system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band
 infile_names <- as.character(na.omit(list_out_df[[1]]$filename))
 out_filename <- "test.tif"
 
+band_names <- (basename(infile_names))
+band_names <- gsub(extension(band_names),"",band_names)
 
+### Need to change data type from Float32 to byte!!!
+### Also need to compress.
+### Add dates??
+
+## need to generate band_names from infile_names
 
 generate_multiband <- function(infile_names, band_names, out_filename,
                                python_bin="/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py"){
-   
-    if(is.null(out_filename)){
-      out_filename <- paste0(region_name,"_",crop_name_processed,"_",val,"_week_",j,out_suffix,file_format)
-    }  
+  ## Function to merge separate image files in a multiband file
+  
+  if(is.null(out_filename)){
+    out_filename <- paste0(region_name,"_",crop_name_processed,"_",val,"_week_",j,out_suffix,file_format)
+  }  
     
-    #if(!is.null(out_dir)){
-    #  out_filename <- file.path(out_dir,out_filename)
-    #}
+  #if(!is.null(out_dir)){
+  #  out_filename <- file.path(out_dir,out_filename)
+  #}
     
-    list_files_vector <- paste(infile_names,collapse = " ")
-      
-    #gdal_merg.py -o test_multiband.tif -separate $lf
+  list_files_vector <- paste(infile_names,collapse = " ")
+  #lf=$(lf -v Alabama_Cotton_2_week_*.tif)
+  #gdal_merg.py -o test_multiband.tif -separate $lf
     
-    gdal_command <- paste0("gdal_merge.py",
+  gdal_command <- paste0("gdal_merge.py",
                            " -o ",out_filename,
                            " -separate ",list_files_vector)
     
-    gdal_command
-    system(gdal_command)
-    
-  system("gdal_merg.py -o test_multiband.tif -separate $lf")
-  #
-  #gdal_merg.py -o alabama_multiband.tif -separate Alabama_Cotton_2_week_14.tif Alabama_Cotton_2_week_15.tif
-  #lf=$(lf -v Alabama_Cotton_2_week_*.tif)
-  #gdal_merg.py -o test_multiband.tif -separate $lf
-  
+  gdal_command
+  system(gdal_command)
   
   system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py test.tif 1 'week_14' 2 'week_15' 3 'week_16'")
   
+  if(extension(out_filename)==".tif"){
+    
+    #system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py test.tif 1 'week_14' 2 'week_15' 3 'week_16'")
+    
+    band_description_command <- paste0("python ",
+                                       "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py",
+                                       out_filename, #this is the file to update
+                                       "1 'week_14' 2 'week_15' 3 'week_16'")
+    system(band_description_command)
+  }
   
   #
+  obj_out <- list(out_filename,gdal_command)
+  names(obj_out) <- c("out_filename","gdal_command")
+  #class(obj_out) <- append(class(obj_out),"reclassify_cropscape")
+  
+  return(obj_out)
 }
 
 
