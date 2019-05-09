@@ -408,54 +408,9 @@ python_bin <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band
 ### Add dates??
 
 ## need to generate band_names from infile_names
-
-generate_multiband <- function(infile_names, band_names, out_filename,
+generate_multiband(infile_names, band_names, out_filename,
                                python_bin="/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py"){
-  ## Function to merge separate image files in a multiband file
   
-  if(is.null(out_filename)){
-    out_filename <- paste0(region_name,"_",crop_name_processed,"_",val,"_week_",j,out_suffix,file_format)
-  }  
-    
-  #if(!is.null(out_dir)){
-  #  out_filename <- file.path(out_dir,out_filename)
-  #}
-    
-  list_files_vector <- paste(infile_names,collapse = " ")
-  #lf=$(lf -v Alabama_Cotton_2_week_*.tif)
-  #gdal_merg.py -o test_multiband.tif -separate $lf
-    
-  gdal_command <- paste0("gdal_merge.py",
-                           " -o ",out_filename,
-                           " -separate ",list_files_vector)
-    
-  gdal_command
-  system(gdal_command)
-  
-  
-  band_val <- paste(1:length(band_names),shQuote(band_names)) 
-  band_val <- paste(band_val,collapse=" ")
-                    
-  system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py test.tif 1 'week_14' 2 'week_15' 3 'week_16'")
-  
-  if(extension(out_filename)==".tif"){
-    
-    #system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py test.tif 1 'week_14' 2 'week_15' 3 'week_16'")
-    
-    band_description_command <- paste0("python ",
-                                       python_bin," ",
-                                       out_filename," ", #this is the file to update
-                                       band_val)
-    system(band_description_command)
-  }
-  
-  #
-  obj_out <- list(out_filename,gdal_command)
-  names(obj_out) <- c("out_filename","gdal_command")
-  #class(obj_out) <- append(class(obj_out),"reclassify_cropscape")
-  
-  return(obj_out)
-}
 
 
 #####################  End of script ###############################
