@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 05/07/2019
+## DATE MODIFIED: 05/21/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
@@ -200,6 +200,7 @@ reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_fo
       gdal_command
       system(gdal_command)
 
+      ### Change data type here...
     }
     
   }else{
@@ -417,5 +418,43 @@ generate_multiband <- function(infile_names, band_names, out_filename,
 
   return(obj_out)
 }
+
+generate_raster_dataType_table <- function(){
+  #Goal: this function generate a table (data.frame) with data types
+  # and valid value range used in the raster package R. The corresponding
+  # data type in the GDAL library is provided to allow matching when using
+  # GDAL commands.
+  
+  # Note that we are using the specific data types for tif.
+  # The following links provide more information:
+  #https://www.gdal.org/frmt_gtiff.html
+  #urrently band types of Byte, UInt16, Int16, UInt32, Int32, Float32, 
+  #Float64, CInt16, CInt32, CFloat32 and CFloat64 are supported for reading and writing.
+  
+  ######### Start scripts ################
+  
+  vals <- c("LOG1S",NA,	FALSE,TRUE, 
+            "INT1S","Byte",	-127,	127,
+            "INT1U",NA,0, 255,
+            "INT2S","Int16",	"-32,767","32,767",
+            "INT2U","UInt16",	0,	"65,534",
+            "INT4S","int32",	"-2,147,483,647",	"2,147,483,647",
+            "INT4U","UInt32",	0,	"4,294,967,296",
+            "FLT4S","Float32",	"-3.4e+38",	"3.4e+38",
+            "FLT8S","Float64",	"-1.7e+308",	"1.7e+308")
+  
+  dataType_table <- matrix(vals,nrow=9,ncol=4,byrow=T)
+  
+  dataType_table <-data.frame(dataType_table)
+  
+  names(dataType_table) <- c("r_type","gdal_type","min","max")
+  ### bug error, columns have become factor: changed this here
+  dataType_table <- data.frame(lapply(dataType_table, as.character), stringsAsFactors=FALSE)
+  
+  #class(dataType_table$gdal_type)
+  
+  return(dataType_table)
+}
+
 
 #############################  End of script ####################################
