@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 05/07/2019
+## DATE MODIFIED: 05/21/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -109,7 +109,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_05072019.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_05172019.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -127,7 +127,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 6
-out_suffix <-"agbirds_processing_05072019" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_05172019" #output suffix for the files and ouptut folder
 #ARGS 7
 num_cores <- 2 # number of cores
 #ARGS 8
@@ -326,7 +326,17 @@ if(!is.null(crop_name)){
   crop_name <- legend_df_subset$CLASS_NAME
   
   #undebug(generate_crop_status_raster)
-  #test <- generate_crop_status_raster(crop_name[i],
+  test <- generate_crop_status_raster(crop_name[i],
+  in_filename_raster,
+  region_name,
+  data_screened_df,
+  legend_df=legend_df_subset,
+  algorithm,
+  num_cores,#set the cores here
+  file_format, 
+  out_dir,
+  out_suffix)
+  
   #                                           in_filename_raster,
   #                                           region_name,
   #                                           data_screened_df,
