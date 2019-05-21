@@ -137,7 +137,7 @@ recode_crop <- function(crop_type,data_crop){
   return(obj)
 }
 
-reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_format,out_dir=NULL,out_suffix=NULL){
+reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_format,data_type=NULL,out_dir=NULL,out_suffix=NULL){
   # This function reclassifies a raster into a specific class given data.frame of input.
   # The goal is to generate one raster for every week in a year.
   #
@@ -197,10 +197,11 @@ reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_fo
                              " --calc=",paste0("'(",val_to_code,"*(A==",val,"))'"),
                              " --overwrite")
       
+      ## Data type:INT1U	
+      
       gdal_command
       system(gdal_command)
 
-      ### Change data type here...
     }
     
   }else{
@@ -243,7 +244,7 @@ generate_crop_status_raster <- function(crop_name,
                                         out_suffix){
   #
   # CREATED: 10/22/2018
-  # MODIFIED: 11/27/2018
+  # MODIFIED: 05/22/2019
   # AUTHORS: Benoit Parmentier
   #
   # This function generates crop raster status for a given region (state).
@@ -289,8 +290,10 @@ generate_crop_status_raster <- function(crop_name,
   fun <- function(x) { x[x!=val] <- NA; return(x) }
   r_val <- calc(r_val, fun)
   crop_out_filename <- paste0(crop_name,"_",val,file_format)
+  
   writeRaster(r_val,
               filename = file.path(out_dir,crop_out_filename),
+              datatype='INT1U',
               overwrite=TRUE)
   
   ### Now generate for 52 weeks:
@@ -371,54 +374,6 @@ remove_duplicates_fun <- function(df,selection_val){
   return(df)
 }
 
-## Generate mulitband files from input tif and record band names in description field
-generate_multiband <- function(infile_names, band_names, out_filename,
-                               python_bin="/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py"){
-  ## Function to merge separate image files in a multiband file
-  
-  if(is.null(out_filename)){
-    out_filename <- paste0(region_name,"_",crop_name_processed,"_",val,"_week_",j,out_suffix,file_format)
-  }  
-  
-  #if(!is.null(out_dir)){
-  #  out_filename <- file.path(out_dir,out_filename)
-  #}
-  
-  list_files_vector <- paste(infile_names,collapse = " ")
-  #lf=$(lf -v Alabama_Cotton_2_week_*.tif)
-  #gdal_merg.py -o test_multiband.tif -separate $lf
-  
-  gdal_command <- paste0("gdal_merge.py",
-                         " -o ",out_filename,
-                         " -separate ",list_files_vector)
-  
-  gdal_command
-  system(gdal_command)
-  
-  
-  band_val <- paste(1:length(band_names),shQuote(band_names)) 
-  band_val <- paste(band_val,collapse=" ")
-  
-  system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py test.tif 1 'week_14' 2 'week_15' 3 'week_16'")
-  
-  if(extension(out_filename)==".tif"){
-    
-    #system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py test.tif 1 'week_14' 2 'week_15' 3 'week_16'")
-    
-    band_description_command <- paste0("python ",
-                                       python_bin," ",
-                                       out_filename," ", #this is the file to update
-                                       band_val)
-    system(band_description_command)
-  }
-  
-  # Prepare output object
-  obj_out <- list(out_filename,gdal_command,band_description_command)
-  names(obj_out) <- c("out_filename","gdal_command",band_description_command)
-
-  return(obj_out)
-}
-
 generate_raster_dataType_table <- function(){
   #Goal: this function generate a table (data.frame) with data types
   # and valid value range used in the raster package R. The corresponding
@@ -455,6 +410,4 @@ generate_raster_dataType_table <- function(){
   
   return(dataType_table)
 }
-
-
 #############################  End of script ####################################
