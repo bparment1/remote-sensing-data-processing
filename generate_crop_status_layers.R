@@ -109,7 +109,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_05222019b.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_05222019c.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -369,7 +369,7 @@ if(!is.null(crop_name)){
                         legend_df=legend_df_subset,
                         algorithm,
                         num_cores,#set the cores here,
-                        data_type="INT1U",
+                        data_type=data_type,
                         file_format, 
                         out_dir,
                         out_suffix,
