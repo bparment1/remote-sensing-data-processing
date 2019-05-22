@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 05/21/2019
+## DATE MODIFIED: 05/22/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
@@ -148,6 +148,7 @@ reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_fo
   #4) in_filename:
   #5) algorithm: GDAL or R, use GDAL for larger images
   #6) file_format
+  #7) data_t
   #OUTPUTS
   # 1) obj_out: list made of two components: 
   # out_filename: output file for reclassified crop status
@@ -239,6 +240,7 @@ generate_crop_status_raster <- function(crop_name,
                                         legend_df,
                                         algorithm,
                                         num_cores,
+                                        data_type,
                                         file_format,
                                         out_dir,
                                         out_suffix){
@@ -266,8 +268,9 @@ generate_crop_status_raster <- function(crop_name,
   #5) legend_df: legend from crop raster
   #6) algorithm: GDAL or R, use GDAL for larger images
   #7) num_cores: default is 1
-  #8) file_format:default value is ".tif"
-  #9) out_dir: output dir
+  #8) data_type: raster package data type for the output
+  #9) file_format:default value is ".tif"
+  #10) out_dir: output dir
   #10) out_suffix: suffix added to filename
   #OUTPUTS
   #Data frame:
@@ -293,7 +296,7 @@ generate_crop_status_raster <- function(crop_name,
   
   writeRaster(r_val,
               filename = file.path(out_dir,crop_out_filename),
-              datatype='INT1U',
+              datatype=data_type,
               overwrite=TRUE)
   
   ### Now generate for 52 weeks:
@@ -301,12 +304,14 @@ generate_crop_status_raster <- function(crop_name,
   j <- 1
   #debug(reclassify_raster)
   
+      
   test_obj <- reclassify_raster(15,
                        crop_status=crop_status_df,
                        val=val,
                        in_filename=file.path(out_dir,crop_out_filename),
                        algorithm="GDAL",
                        file_format=file_format,
+                       data_type= data_type,
                        out_dir=out_dir,
                        out_suffix=NULL)
   
@@ -317,6 +322,7 @@ generate_crop_status_raster <- function(crop_name,
                        in_filename=file.path(out_dir,crop_out_filename),
                        algorithm="GDAL",
                        file_format=file_format,
+                       data_type=data_type,
                        out_dir=out_dir,
                        out_suffix=NULL,
                        mc.cores = num_cores,
@@ -389,8 +395,8 @@ generate_raster_dataType_table <- function(){
   ######### Start scripts ################
   
   vals <- c("LOG1S",NA,	FALSE,TRUE, 
-            "INT1S","Byte",	-127,	127,
-            "INT1U",NA,0, 255,
+            "INT1S",NA,	-127,	127,
+            "INT1U","Byte",0, 255,
             "INT2S","Int16",	"-32,767","32,767",
             "INT2U","UInt16",	0,	"65,534",
             "INT4S","int32",	"-2,147,483,647",	"2,147,483,647",
@@ -410,4 +416,5 @@ generate_raster_dataType_table <- function(){
   
   return(dataType_table)
 }
+
 #############################  End of script ####################################
