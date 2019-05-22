@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 05/21/2019
+## DATE MODIFIED: 05/22/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -109,7 +109,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_05172019.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_05222019.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -144,7 +144,7 @@ crop_name <- NULL #if NULL run for all crops in the given state(s)
 #crop_name <- "Cotton"
 ## 
 regions_infile <- "cb_2016_us_state_500k.shp" #states
-
+data_type <- "INT1U"
 
 ##### Constant:
 
@@ -317,6 +317,7 @@ if(!is.null(crop_name)){
                                       legend_df=legend_df_subset,
                                       algorithm,
                                       num_cores,
+                                      data_type="INT1U",
                                       file_format,
                                       out_dir,
                                       out_suffix)
@@ -333,6 +334,7 @@ if(!is.null(crop_name)){
   legend_df=legend_df_subset,
   algorithm,
   num_cores,#set the cores here
+  data_type=data_type,
   file_format, 
   out_dir,
   out_suffix)
@@ -366,7 +368,8 @@ if(!is.null(crop_name)){
                         data_screened_df,
                         legend_df=legend_df_subset,
                         algorithm,
-                        num_cores,#set the cores here
+                        num_cores,#set the cores here,
+                        data_type="INT1U",
                         file_format, 
                         out_dir,
                         out_suffix,
