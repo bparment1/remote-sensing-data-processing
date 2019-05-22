@@ -169,6 +169,9 @@ reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_fo
   val_to_code <- sum(crop_status_df[[col_val]]) #first value is planting, the other one is havesting
   crop_name_processed <- unique(crop_status_df$Crop)
   
+  dataType_table <- generate_raster_dataType_table()
+  data_type_gdal <- dataType_table[dataType_table$r_type==data_type,]$gdal_type 
+  
   if(val_to_code>0){
     if(algorithm=="R"){
       
@@ -191,7 +194,7 @@ reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_fo
       gdal_command <- paste0("gdal_calc.py",
                              " -A ",in_filename,
                              " --outfile=",out_filename,
-                             paste("--type=",data_type,sep=""),
+                             paste(" --type=",data_type_gdal,sep=""),
                              " --co='COMPRESS=LZW'",
                              #paste("--NoDataValue=",NA_flag_val,sep=""),
                              " --calc=",paste0("'(",val_to_code,"*(A==",val,"))'"),
@@ -310,7 +313,6 @@ generate_crop_status_raster <- function(crop_name,
   j <- 1
   #debug(reclassify_raster)
   
-      
   test_obj <- reclassify_raster(15,
                        crop_status=crop_status_df,
                        val=val,
