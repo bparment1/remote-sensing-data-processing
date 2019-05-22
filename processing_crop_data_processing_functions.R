@@ -148,7 +148,9 @@ reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_fo
   #4) in_filename:
   #5) algorithm: GDAL or R, use GDAL for larger images
   #6) file_format
-  #7) data_t
+  #7) data_type
+  #8) out_dir
+  #9) out_suffix
   #OUTPUTS
   # 1) obj_out: list made of two components: 
   # out_filename: output file for reclassified crop status
@@ -181,12 +183,6 @@ reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_fo
       
       #Just use gdal_calc.py
       
-      #For example, below will convert the values below 3 to 0 and above 3 to 1. You can use equals as well.
-      #in_filename <- crop_out_filename
-      #gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="0*(A<3)" --calc="1*(A>3)"
-      #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
-      #gdal_command <- gdal_calc.py -A C:temp\raster.tif --outfile=result.tiff --calc="val_to_recode*(A==val)" --calc="0*(A==val)"
-      
       out_filename <- paste0(region_name,"_",crop_name_processed,"_",val,"_week_",j,out_suffix,file_format)
       if(!is.null(out_dir)){
         out_filename <- file.path(out_dir,out_filename)
@@ -195,9 +191,12 @@ reclassify_raster <- function(j,crop_status_df,val,in_filename,algorithm,file_fo
       gdal_command <- paste0("gdal_calc.py",
                              " -A ",in_filename,
                              " --outfile=",out_filename,
+                             paste("--type=",data_type,sep=""),
+                             " --co='COMPRESS=LZW'",
+                             #paste("--NoDataValue=",NA_flag_val,sep=""),
                              " --calc=",paste0("'(",val_to_code,"*(A==",val,"))'"),
                              " --overwrite")
-      
+    
       ## Data type:INT1U	
       
       gdal_command
@@ -291,13 +290,20 @@ generate_crop_status_raster <- function(crop_name,
   
   #### This can be changed to gdal_calc later
   fun <- function(x) { x[x!=val] <- NA; return(x) }
-  r_val <- calc(r_val, fun)
   crop_out_filename <- paste0(crop_name,"_",val,file_format)
   
-  writeRaster(r_val,
-              filename = file.path(out_dir,crop_out_filename),
-              datatype=data_type,
-              overwrite=TRUE)
+  r_val <- calc(r_val, 
+                fun,
+                filename = file.path(out_dir,crop_out_filename),
+                datatype=data_type,
+                options=c("COMPRESS=LZW"),
+                overwrite=TRUE)
+  
+  #writeRaster(r_val,
+  #            filename = file.path(out_dir,crop_out_filename),
+  #            datatype=data_type,
+  #            options=c("COMPRESS=LZW"),
+  #            overwrite=TRUE)
   
   ### Now generate for 52 weeks:
   
