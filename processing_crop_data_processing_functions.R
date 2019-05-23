@@ -10,7 +10,7 @@
 ## ISSUE: 
 ## TO DO:
 ##
-## COMMIT: fix output name problem
+## COMMIT: fix bug in generate_multiband and compression
 ##
 
 ###################################################
@@ -438,12 +438,19 @@ generate_multiband <- function(infile_names, band_names, out_filename,
   #  out_filename <- file.path(out_dir,out_filename)
   #}
   
+  if(file.exists(out_filename)){
+    #Delete file if it exists
+    file.remove(out_filename)
+    
+  } 
+  
   list_files_vector <- paste(infile_names,collapse = " ")
   #lf=$(lf -v Alabama_Cotton_2_week_*.tif)
   #gdal_merg.py -o test_multiband.tif -separate $lf
   
   gdal_command <- paste0("gdal_merge.py",
                          " -o ",out_filename,
+                         " -co COMPRESS=LZW",
                          " -separate ",list_files_vector)
   
   gdal_command
@@ -453,11 +460,7 @@ generate_multiband <- function(infile_names, band_names, out_filename,
   band_val <- paste(1:length(band_names),shQuote(band_names)) 
   band_val <- paste(band_val,collapse=" ")
   
-  system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py test.tif 1 'week_14' 2 'week_15' 3 'week_16'")
-  
   if(extension(out_filename)==".tif"){
-    
-    #system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py test.tif 1 'week_14' 2 'week_15' 3 'week_16'")
     
     band_description_command <- paste0("python ",
                                        python_bin," ",
