@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 05/22/2019
+## DATE MODIFIED: 05/23/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -109,7 +109,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_05222019c.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_05232019b.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -350,17 +350,6 @@ if(!is.null(crop_name)){
   #                                           out_suffix)
   #
   
-  #list_out_df <- lapply(crop_name[1:2],
-  #                      FUN=generate_crop_status_raster,
-  #                      in_filename_raster,
-  #                      region_name,
-  #                      data_screened_df,
-  #                      legend_df=legend_df_subset,
-  #                      algorithm,
-  #                      num_cores,
-  #                      file_format,
-  #                      out_dir,
-  #                      out_suffix)
   list_out_df <- mclapply(crop_name,
                         FUN=generate_crop_status_raster,
                         in_filename_raster,
@@ -377,7 +366,6 @@ if(!is.null(crop_name)){
                         mc.preschedule = FALSE)
   
 }
-
 
 ### let's report on the output created
 names(list_out_df[[1]])
@@ -398,19 +386,9 @@ out_df <- list_out_df[[1]]
 ###############################################
 ########### PART 5: Mutliband merging of bands and adding description
 
-#gdalwarp Alabama*.tif test.tif
-#gdalwarp --config GDAL_CACHEMAX 3000 -wm 3000 $(list_of_tiffs) merged.tiff
-
-#gdal_merg.py -o alabama_multiband.tif -separate Alabama_Cotton_2_week_14.tif Alabama_Cotton_2_week_15.tif
-#lf=$(lf -v Alabama_Cotton_2_week_*.tif)
-#gdal_merg.py -o test_multiband.tif -separate $lf
-
-system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py test.tif 1 'week_14' 2 'week_15' 3 'week_16'")
-#system(paste('/home/anaconda3/bin/python','home/Desktop/myfile.py',NCORE))
-
 ## add function:
 infile_names <- as.character(na.omit(list_out_df[[1]]$filename))
-out_filename <- "test.tif"
+out_filename <- "test2.tif"
 
 band_names <- (basename(infile_names))
 band_names <- gsub(extension(band_names),"",band_names)
@@ -421,9 +399,21 @@ python_bin <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band
 ### Add dates??
 
 ## need to generate band_names from infile_names
-generate_multiband(infile_names, band_names, out_filename,
-                               python_bin="/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py"){
-  
+debug(generate_multiband)
 
+test_out <- generate_multiband(infile_names, 
+                   band_names, 
+                   out_filename,
+                   python_bin=python_bin)
+
+#Still need to test, also need to delete files that are produced once it these are merged in a multiband.
+
+#list_merged_crop_files <- mclapply(list_infile_names,
+#                        FUN=generate_multiband,
+#                        band_names, 
+#                        out_filename,
+#                        python_bin=python_bin,
+#                        mc.cores = 1,
+#                        mc.preschedule = FALSE)
 
 #####################  End of script ###############################
