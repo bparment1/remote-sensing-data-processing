@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 05/22/2019
+## DATE MODIFIED: 05/23/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
@@ -423,6 +423,54 @@ generate_raster_dataType_table <- function(){
   #class(dataType_table$gdal_type)
   
   return(dataType_table)
+}
+
+## Generate mulitband files from input tif and record band names in description field
+generate_multiband <- function(infile_names, band_names, out_filename,
+                               python_bin="/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py"){
+  ## Function to merge separate image files in a multiband file
+  
+  if(is.null(out_filename)){
+    out_filename <- paste0(region_name,"_",crop_name_processed,"_",val,"_week_",j,out_suffix,file_format)
+  }  
+  
+  #if(!is.null(out_dir)){
+  #  out_filename <- file.path(out_dir,out_filename)
+  #}
+  
+  list_files_vector <- paste(infile_names,collapse = " ")
+  #lf=$(lf -v Alabama_Cotton_2_week_*.tif)
+  #gdal_merg.py -o test_multiband.tif -separate $lf
+  
+  gdal_command <- paste0("gdal_merge.py",
+                         " -o ",out_filename,
+                         " -separate ",list_files_vector)
+  
+  gdal_command
+  system(gdal_command)
+  
+  
+  band_val <- paste(1:length(band_names),shQuote(band_names)) 
+  band_val <- paste(band_val,collapse=" ")
+  
+  system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py test.tif 1 'week_14' 2 'week_15' 3 'week_16'")
+  
+  if(extension(out_filename)==".tif"){
+    
+    #system("python /nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py test.tif 1 'week_14' 2 'week_15' 3 'week_16'")
+    
+    band_description_command <- paste0("python ",
+                                       python_bin," ",
+                                       out_filename," ", #this is the file to update
+                                       band_val)
+    system(band_description_command)
+  }
+  
+  # Prepare output object
+  obj_out <- list(out_filename,gdal_command,band_description_command)
+  names(obj_out) <- c("out_filename","gdal_command",band_description_command)
+  
+  return(obj_out)
 }
 
 #############################  End of script ####################################
