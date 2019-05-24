@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 05/23/2019
+## DATE MODIFIED: 05/24/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -109,7 +109,7 @@ load_obj <- function(f){
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
 
-crop_data_processing_functions <- "processing_crop_data_processing_functions_05232019b.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_05242019.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -133,7 +133,7 @@ num_cores <- 2 # number of cores
 #ARGS 8
 #in_filename <- "Crop_Data_modified.csv"
 in_filename <- "Crop_Data_modified_AD4Benoit.csv" #updated names
-#ARGS 9
+#ARGS 9: Change to general file for the whole US
 in_filename_raster <- "cdl_alabama.tif" #this should be the general image for the whole US
 #ARGS 10
 state_val <- "Alabama" #if null should loop through?
@@ -388,6 +388,9 @@ out_df <- list_out_df[[1]]
 
 ## add function:
 infile_names <- as.character(na.omit(list_out_df[[1]]$filename))
+#list_infile_names <- lapply(list_out_df,FUN=function(x){x$filename})
+list_infile_names <- lapply(list_out_df,FUN=function(x){as.character(na.omit(x$filename))})
+
 out_filename <- "test2.tif"
 
 band_names <- (basename(infile_names))
@@ -405,15 +408,21 @@ test_out <- generate_multiband(infile_names,
                    band_names, 
                    out_filename,
                    python_bin=python_bin)
+ 
+r_brick <- brick(test_out$out_filename)
+plot(r_brick)
 
 #Still need to test, also need to delete files that are produced once it these are merged in a multiband.
 
-#list_merged_crop_files <- mclapply(list_infile_names,
-#                        FUN=generate_multiband,
-#                        band_names, 
-#                        out_filename,
-#                        python_bin=python_bin,
-#                        mc.cores = 1,
-#                        mc.preschedule = FALSE)
+list_merged_crop_files <- mclapply(list_infile_names,
+                        FUN=generate_multiband,
+                        band_names, 
+                        out_filename,
+                        python_bin=python_bin,
+                        mc.cores = 1,
+                        mc.preschedule = FALSE)
+
+mapply(rep, times = 1:4, x = 4:1)
+
 
 #####################  End of script ###############################
