@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 08/03/2018
-## DATE MODIFIED: 05/23/2019
+## DATE MODIFIED: 05/24/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 1
 ## PROJECT: Agbirds
@@ -427,8 +427,14 @@ generate_raster_dataType_table <- function(){
 
 ## Generate mulitband files from input tif and record band names in description field
 generate_multiband <- function(infile_names, band_names, out_filename,
-                               python_bin="/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py"){
+                               python_bin=".",remove_files=T){
   ## Function to merge separate image files in a multiband file
+  ##INPUTS
+  #1)
+  #2)
+  #3)
+  #4)
+  #5) remove_files: if true, removes files after merging into single multiband file
   
   if(is.null(out_filename)){
     out_filename <- paste0(region_name,"_",crop_name_processed,"_",val,"_week_",j,out_suffix,file_format)
@@ -468,6 +474,12 @@ generate_multiband <- function(infile_names, band_names, out_filename,
                                        band_val)
     system(band_description_command)
   }
+  
+  if(remove_files==TRUE){
+    lapply(infile_names,
+           FUN=function(x){file.remove(x)})
+  } 
+    
   
   # Prepare output object
   obj_out <- list(out_filename,gdal_command,band_description_command)
