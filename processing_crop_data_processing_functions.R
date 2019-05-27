@@ -427,17 +427,17 @@ generate_raster_dataType_table <- function(){
 
 ## Generate mulitband files from input tif and record band names in description field
 generate_multiband <- function(infile_names, band_names, out_filename,
-                               python_bin=".",remove_files=T){
+                               python_bin=".",remove_files=F){
   ## Function to merge separate image files in a multiband file
   ##INPUTS
-  #1)
-  #2)
-  #3)
-  #4)
+  #1) infile_names: list of files or string/character vector
+  #2) band_names: names of bands being aggregated
+  #3) out_filename
+  #4) python_bin
   #5) remove_files: if true, removes files after merging into single multiband file
   
   if(is.null(out_filename)){
-    out_filename <- paste0(region_name,"_",crop_name_processed,"_",val,"_week_",j,out_suffix,file_format)
+    out_filename <- paste0("raster_merged.tif")
   }  
   
   #if(!is.null(out_dir)){
@@ -450,7 +450,11 @@ generate_multiband <- function(infile_names, band_names, out_filename,
     
   } 
   
-  list_files_vector <- paste(infile_names,collapse = " ")
+  ## If list/vector of files,then collapse into on unique string 
+  if(length(infile_names)>1){
+    list_files_vector <- paste(infile_names,collapse = " ")
+  }
+  
   #lf=$(lf -v Alabama_Cotton_2_week_*.tif)
   #gdal_merg.py -o test_multiband.tif -separate $lf
   
