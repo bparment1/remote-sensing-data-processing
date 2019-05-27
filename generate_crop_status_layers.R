@@ -387,11 +387,14 @@ out_df <- list_out_df[[1]]
 ########### PART 5: Mutliband merging of bands and adding description
 
 ## add function:
-infile_names <- as.character(na.omit(list_out_df[[1]]$filename))
+infile_names <- as.character(na.omit(list_out_df[[2]]$filename))
 #list_infile_names <- lapply(list_out_df,FUN=function(x){x$filename})
 list_infile_names <- lapply(list_out_df,FUN=function(x){as.character(na.omit(x$filename))})
 
-out_filename <- "test2.tif"
+list_band_names <- lapply(list_infile_names,
+                          FUN=function(x){gsub(extension(basename(x)),"",basename(x))})
+
+out_filename <- "Cotton_test.tif"
 
 band_names <- (basename(infile_names))
 band_names <- gsub(extension(band_names),"",band_names)
@@ -415,14 +418,29 @@ plot(r_brick)
 #Still need to test, also need to delete files that are produced once it these are merged in a multiband.
 
 list_merged_crop_files <- mclapply(list_infile_names,
-                        FUN=generate_multiband,
+                        FUN=generate_multiband,   
                         band_names, 
                         out_filename,
                         python_bin=python_bin,
                         mc.cores = 1,
                         mc.preschedule = FALSE)
 
-mapply(rep, times = 1:4, x = 4:1)
+#mapply(rep, times = 1:4, x = 4:1)
+
+test<- unlist(lapply(list_infile_names,function(x){list_files_vector <- paste(x,collapse = " ")}))
+
+data.frame(infile_name=test,
+           band_names=band_names_l,
+           out_filename=out_filename_l,
+           python_bin)
+
+list_merged_crop_files <- mcmapply(list_infile_names,
+                                   FUN=generate_multiband,
+                                   band_names, 
+                                   out_filename,
+                                   python_bin=python_bin,
+                                   mc.cores = 1,
+                                   mc.preschedule = FALSE)
 
 
 #####################  End of script ###############################
