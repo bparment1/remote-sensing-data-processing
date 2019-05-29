@@ -453,9 +453,11 @@ generate_multiband <- function(infile_names, band_names, out_filename,
   ## If list/vector of files,then collapse into on unique string 
   if(length(infile_names)>1){
     list_files_vector <- paste(infile_names,collapse = " ")
+  }else{
+    list_files_vector <- infile_names #assume the format is ok.
   }
   
-  #lf=$(lf -v Alabama_Cotton_2_week_*.tif)
+  #lf=$(lf -v Alabama_C otton_2_week_*.tif)
   #gdal_merg.py -o test_multiband.tif -separate $lf
   
   gdal_command <- paste0("gdal_merge.py",
@@ -466,9 +468,15 @@ generate_multiband <- function(infile_names, band_names, out_filename,
   gdal_command
   system(gdal_command)
   
+  if(length(band_names)>1){
+    band_val <- paste(1:length(band_names),shQuote(band_names)) 
+    band_val <- paste(band_val,collapse=" ")
+  }else{
+    band_val <- unlist(strsplit(band_names," "))
+    band_val <- paste(1:length(band_val),shQuote(band_val))
+    band_val <- paste(band_val,collapse=" ")
+  }
   
-  band_val <- paste(1:length(band_names),shQuote(band_names)) 
-  band_val <- paste(band_val,collapse=" ")
   
   if(extension(out_filename)==".tif"){
     
@@ -483,7 +491,6 @@ generate_multiband <- function(infile_names, band_names, out_filename,
     lapply(infile_names,
            FUN=function(x){file.remove(x)})
   } 
-    
   
   # Prepare output object
   obj_out <- list(out_filename,gdal_command,band_description_command)
