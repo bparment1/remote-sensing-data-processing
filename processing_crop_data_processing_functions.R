@@ -432,8 +432,8 @@ generate_multiband <- function(infile_names, band_names, out_filename,
   ##INPUTS
   #1) infile_names: list of files or string/character vector
   #2) band_names: names of bands being aggregated
-  #3) out_filename
-  #4) python_bin
+  #3) out_filename: name of the multiband file created, if tif, input file names are added in the description
+  #4) python_bin: path to the add description script used here
   #5) remove_files: if true, removes files after merging into single multiband file
   
   if(is.null(out_filename)){
@@ -479,6 +479,7 @@ generate_multiband <- function(infile_names, band_names, out_filename,
   
   
   if(extension(out_filename)==".tif"){
+    #"/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py"
     
     band_description_command <- paste0("python ",
                                        python_bin," ",
