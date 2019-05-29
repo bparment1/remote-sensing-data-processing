@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 05/24/2019
+## DATE MODIFIED: 05/29/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -108,8 +108,7 @@ load_obj <- function(f){
 
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
-
-crop_data_processing_functions <- "processing_crop_data_processing_functions_05242019.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_05292019.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -390,16 +389,22 @@ out_df <- list_out_df[[1]]
 infile_names <- as.character(na.omit(list_out_df[[2]]$filename))
 #list_infile_names <- lapply(list_out_df,FUN=function(x){x$filename})
 list_infile_names <- lapply(list_out_df,FUN=function(x){as.character(na.omit(x$filename))})
-
+error_list <- unlist(lapply(list_infile_names,FUN=function(x){length(x)>0}))
+list_infile_names <- list_infile_names[error_list]  
 list_band_names <- lapply(list_infile_names,
                           FUN=function(x){gsub(extension(basename(x)),"",basename(x))})
 
-out_filename <- "Cotton_test.tif"
+#fun_test <- function(x){gsub(extension(basename(x)),"",basename(x))}
+#fun_test(list_infile_names[[3]])
+list_out_filename <- crop_name[error_list]
+list_infile_names <- unlist(lapply(list_infile_names,function(x){list_files_vector <- paste(x,collapse = " ")}))
+list_band_names <- unlist(lapply(list_band_names,function(x){list_files_vector <- paste(x,collapse = " ")}))
 
+out_filename <- "Cotton_test.tif"
 band_names <- (basename(infile_names))
 band_names <- gsub(extension(band_names),"",band_names)
-
 python_bin <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py"
+
 ### Need to change data type from Float32 to byte!!!
 ### Also need to compress.
 ### Add dates??
@@ -427,19 +432,23 @@ list_merged_crop_files <- mclapply(list_infile_names,
 
 #mapply(rep, times = 1:4, x = 4:1)
 
-test<- unlist(lapply(list_infile_names,function(x){list_files_vector <- paste(x,collapse = " ")}))
 
-data.frame(infile_name=test,
-           band_names=band_names_l,
-           out_filename=out_filename_l,
-           python_bin)
+data_inputs_df <- data.frame(infile_name=list_infile_names,
+                             band_names=list_band_names,
+                             out_filename=list_out_filename,
+                             python_bin = python_bin)
 
-list_merged_crop_files <- mcmapply(list_infile_names,
-                                   FUN=generate_multiband,
-                                   band_names, 
-                                   out_filename,
-                                   python_bin=python_bin,
-                                   mc.cores = 1,
+data_inputs_df$python_bin <- as.character(data_inputs_df$python_bin)
+data_inputs_df$out_filename <- as.character(data_inputs_df$out_filename)
+data_inputs_df$band_names <- as.character(data_inputs_df$band_names)
+data_inputs_df$infile_name <- as.character(data_inputs_df$infile_name)
+
+list_merged_crop_files <- mcmapply(generate_multiband,
+                                   infile_name = data_inputs_df$infile_name,
+                                   band_names = data_inputs_df$band_names, 
+                                   out_filename = data_inputs_df$out_filename,
+                                   python_bin = data_inputs_df$python_bin,
+                                   mc.cores = 3,
                                    mc.preschedule = FALSE)
 
 
