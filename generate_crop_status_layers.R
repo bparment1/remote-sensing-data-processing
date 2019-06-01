@@ -108,7 +108,7 @@ load_obj <- function(f){
 
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
-crop_data_processing_functions <- "processing_crop_data_processing_functions_05292019.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_05292019b.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -126,7 +126,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 6
-out_suffix <-"agbirds_processing_05222019" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_05292019" #output suffix for the files and ouptut folder
 #ARGS 7
 num_cores <- 2 # number of cores
 #ARGS 8
@@ -396,7 +396,7 @@ list_band_names <- lapply(list_infile_names,
 
 #fun_test <- function(x){gsub(extension(basename(x)),"",basename(x))}
 #fun_test(list_infile_names[[3]])
-list_out_filename <- crop_name[error_list]
+list_out_filename <- paste0(crop_name[error_list],"_",region_name,file_format)
 list_infile_names <- unlist(lapply(list_infile_names,function(x){list_files_vector <- paste(x,collapse = " ")}))
 list_band_names <- unlist(lapply(list_band_names,function(x){list_files_vector <- paste(x,collapse = " ")}))
 
@@ -409,29 +409,6 @@ python_bin <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band
 ### Also need to compress.
 ### Add dates??
 
-## need to generate band_names from infile_names
-debug(generate_multiband)
-
-test_out <- generate_multiband(infile_names, 
-                   band_names, 
-                   out_filename,
-                   python_bin=python_bin)
- 
-r_brick <- brick(test_out$out_filename)
-plot(r_brick)
-
-#Still need to test, also need to delete files that are produced once it these are merged in a multiband.
-
-list_merged_crop_files <- mclapply(list_infile_names,
-                        FUN=generate_multiband,   
-                        band_names, 
-                        out_filename,
-                        python_bin=python_bin,
-                        mc.cores = 1,
-                        mc.preschedule = FALSE)
-
-#mapply(rep, times = 1:4, x = 4:1)
-
 
 data_inputs_df <- data.frame(infile_name=list_infile_names,
                              band_names=list_band_names,
@@ -442,6 +419,18 @@ data_inputs_df$python_bin <- as.character(data_inputs_df$python_bin)
 data_inputs_df$out_filename <- as.character(data_inputs_df$out_filename)
 data_inputs_df$band_names <- as.character(data_inputs_df$band_names)
 data_inputs_df$infile_name <- as.character(data_inputs_df$infile_name)
+
+
+#debug(generate_multiband)
+#i<-2
+test_out <- generate_multiband(infile_names = data_inputs_df$infile_name[i], 
+                               band_names = data_inputs_df$band_names[i], 
+                               out_filename = data_inputs_df$out_filename[i],
+                               python_bin=data_inputs_df$python_bin[i])
+
+
+#r_brick <- brick(test_out$out_filename)
+#plot(r_brick)
 
 list_merged_crop_files <- mcmapply(generate_multiband,
                                    infile_name = data_inputs_df$infile_name,
