@@ -108,7 +108,7 @@ load_obj <- function(f){
 
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
-crop_data_processing_functions <- "processing_crop_data_processing_functions_06052019.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_06052019b.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -126,7 +126,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 6
-out_suffix <-"agbirds_processing_06052019" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_06052019b" #output suffix for the files and ouptut folder
 #ARGS 7
 num_cores <- 2 # number of cores
 #ARGS 8
@@ -136,7 +136,7 @@ in_filename <- "Crop_Data_modified_AD4Benoit.csv" #updated names
 #in_filename_raster <- "cdl_alabama.tif" #this should be the general image for the whole US
 in_filename_raster <- "2016_30m_cdls.img"
 #ARGS 10
-state_val <- "Alabama" #if null should loop through?
+state_val <- "Iowa" #if null should loop through?
 #state_val <- c("Alabama","South Dakota, "Nebraska,"Iowa") #should go on a node
 
 #ARGS 11
@@ -179,6 +179,8 @@ if(create_out_dir_param==TRUE){
 #######################################
 ### PART 1: Read in DATA and crop to area of interest #######
 
+region_name <- state_val
+
 regions_sf <- st_read(file.path(in_dir,regions_infile))
 plot(regions_sf$geometry)
 #View(regions_sf)
@@ -195,7 +197,8 @@ ref_rast_name_generated <- paste("ref_rast_crop_",region_name,"_",out_suffix,fil
 
 ref_rast <- crop(r_cropland,
                  reg_sp,
-                 filename=file.path(out_dir,ref_rast_name_generated))  
+                 filename=file.path(out_dir,ref_rast_name_generated),
+                 overwrite=T)  
 #writeRaster(ref_rast,
 #            file.path(out_dir,ref_rast_name_generated)
 #            )
@@ -309,9 +312,9 @@ legend_df <- read.dbf(file.path(in_dir,in_filename_legend))
 
 #View(test)
 legend_df$Class_Name <- as.character(legend_df$Class_Name)
-unique(legend_df$Class_Name)
+unique(legend_df$Class_Name) #about 132 crops
 
-unique(data_screened_df$Crop)
+unique(data_screened_df$Crop) #about 16 crops
 ### will need to match the names of crop in the legend to the names in the dataset created by the workshop!
 
 common_crop_list <- intersect(unique(data_screened_df$Crop),unique(legend_df$Class_Name))
@@ -321,7 +324,6 @@ legend_df_subset <- subset(legend_df,Class_Name%in% common_crop_list)
 ###############################################
 ########### PART 4: Now generate raster crop status
 
-region_name <- state_val
 
 if(!is.null(crop_name)){
   
@@ -344,6 +346,8 @@ if(!is.null(crop_name)){
   crop_name <- legend_df_subset$Class_Name
   
   #undebug(generate_crop_status_raster)
+  # do test for tobaco!!
+  
   test <- generate_crop_status_raster(crop_name[i],
                                       ref_rast_name_generated,
                                       region_name,
