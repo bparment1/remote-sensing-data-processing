@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 05/29/2019
+## DATE MODIFIED: 06/05/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -108,7 +108,7 @@ load_obj <- function(f){
 
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
-crop_data_processing_functions <- "processing_crop_data_processing_functions_05292019b.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_06052019.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -126,14 +126,15 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 6
-out_suffix <-"agbirds_processing_05292019" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_06052019" #output suffix for the files and ouptut folder
 #ARGS 7
 num_cores <- 2 # number of cores
 #ARGS 8
 #in_filename <- "Crop_Data_modified.csv"
 in_filename <- "Crop_Data_modified_AD4Benoit.csv" #updated names
 #ARGS 9: Change to general file for the whole US
-in_filename_raster <- "cdl_alabama.tif" #this should be the general image for the whole US
+#in_filename_raster <- "cdl_alabama.tif" #this should be the general image for the whole US
+in_filename_raster <- "2016_30m_cdls.img"
 #ARGS 10
 state_val <- "Alabama" #if null should loop through?
 #state_val <- c("Alabama","South Dakota, "Nebraska,"Iowa") #should go on a node
@@ -147,7 +148,8 @@ data_type <- "INT1U" #byte data (0,255)
 
 ##### Constant:
 
-in_filename_legend <- "CDL_2017_01.tif.vat.dbf"
+#in_filename_legend <- "CDL_2017_01.tif.vat.dbf"
+in_filename_legend <- "2016_30m_cdls.img.vat.dbf"
 
 ################# START SCRIPT ###############################
 
@@ -162,6 +164,8 @@ if(is.null(out_dir)){
   out_dir <- in_dir #output will be created in the input dir
   
 }
+
+
 #out_dir <- in_dir #output will be created in the input dir
 
 out_suffix_s <- out_suffix #can modify name of output suffix
@@ -177,18 +181,32 @@ if(create_out_dir_param==TRUE){
 
 regions_sf <- st_read(file.path(in_dir,regions_infile))
 plot(regions_sf$geometry)
-
+#View(regions_sf)
 ### This is where you crop the cropscape product:
+r_cropland <- raster(file.path(in_dir,in_filename_raster))
+#infile_reg_outline <- infile_reg_outline_Houston_city_limits
+#reg_sf <- st_read(infile_reg_outline)
+
+reg_sf <- st_transform(regions_sf,crs=projection(r_cropland))
+reg_sp <-as(reg_sf, "Spatial") 
+reg_sp <- reg_sp[reg_sp$NAME==region_name,]
+
+ref_rast_name_generated <- paste("ref_rast_crop_",region_name,"_",out_suffix,file_format,sep="")
+
+ref_rast <- crop(r_cropland,
+                 reg_sp,
+                 filename=file.path(out_dir,ref_rast_name_generated))  
+#writeRaster(ref_rast,
+#            file.path(out_dir,ref_rast_name_generated)
+#            )
+
 
 #### end of crop in
-
 
 data_df <- read.table(file.path(in_dir,in_filename),
                       sep=",",
                       header=T,
                       stringsAsFactors = F)
-
-
 
 ### First clean up before setting up the coding:
 
@@ -290,15 +308,15 @@ write.table(data_screened_df,
 legend_df <- read.dbf(file.path(in_dir,in_filename_legend))
 
 #View(test)
-legend_df$CLASS_NAME <- as.character(legend_df$CLASS_NAME)
-unique(legend_df$CLASS_NAME)
+legend_df$Class_Name <- as.character(legend_df$Class_Name)
+unique(legend_df$Class_Name)
 
 unique(data_screened_df$Crop)
 ### will need to match the names of crop in the legend to the names in the dataset created by the workshop!
 
-common_crop_list <- intersect(unique(data_screened_df$Crop),unique(legend_df$CLASS_NAME))
+common_crop_list <- intersect(unique(data_screened_df$Crop),unique(legend_df$Class_Name))
 
-legend_df_subset <- subset(legend_df,CLASS_NAME%in% common_crop_list)
+legend_df_subset <- subset(legend_df,Class_Name%in% common_crop_list)
 
 ###############################################
 ########### PART 4: Now generate raster crop status
@@ -310,7 +328,7 @@ if(!is.null(crop_name)){
   #undebug(generate_crop_status_raster)
   ## Takes about 10 minutes for Cotton in Alabama
   list_out_df <- generate_crop_status_raster(crop_name,
-                                      in_filename_raster,
+                                             ref_rast_name_generated,
                                       region_name,
                                       data_screened_df,
                                       legend_df=legend_df_subset,
@@ -323,35 +341,24 @@ if(!is.null(crop_name)){
 }else{
   
   i <- 1
-  crop_name <- legend_df_subset$CLASS_NAME
+  crop_name <- legend_df_subset$Class_Name
   
   #undebug(generate_crop_status_raster)
-  #test <- generate_crop_status_raster(crop_name[i],
-  #in_filename_raster,
-  #region_name,
-  #data_screened_df,
-  #legend_df=legend_df_subset,
-  #algorithm,
-  #num_cores,#set the cores here
-  #data_type=data_type,
-  #file_format, 
-  #out_dir,
-  #out_suffix)
-  
-  #                                           in_filename_raster,
-  #                                           region_name,
-  #                                           data_screened_df,
-  #                                           legend_df=legend_df_subset,
-  #                                           algorithm,
-  #                                           num_cores,
-  #                                           file_format,
-  #                                           out_dir,
-  #                                           out_suffix)
-  #
-  
+  test <- generate_crop_status_raster(crop_name[i],
+                                      ref_rast_name_generated,
+                                      region_name,
+                                      data_screened_df,
+                                      legend_df=legend_df_subset,
+                                      algorithm,
+                                      num_cores,#set the cores here,
+                                      data_type=data_type,
+                                      file_format, 
+                                      out_dir,
+                                      out_suffix)
+
   list_out_df <- mclapply(crop_name,
                         FUN=generate_crop_status_raster,
-                        in_filename_raster,
+                        ref_rast_name_generated,
                         region_name,
                         data_screened_df,
                         legend_df=legend_df_subset,
