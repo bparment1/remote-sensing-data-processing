@@ -248,7 +248,7 @@ generate_crop_status_raster <- function(crop_name,
                                         out_suffix){
   #
   # CREATED: 10/22/2018
-  # MODIFIED: 05/22/2019
+  # MODIFIED: 06/05/2019
   # AUTHORS: Benoit Parmentier
   #
   # This function generates crop raster status for a given region (state).
@@ -285,11 +285,11 @@ generate_crop_status_raster <- function(crop_name,
   
   #### Genereate specific crop layer
   
-  r_region <- raster(file.path(in_dir,in_filename_raster))
+  r_region <- raster(in_filename_raster)
   r_val <- r_region
   
   ## crop value in the cropscape product
-  val <- legend_df[legend_df$CLASS_NAME==crop_name,]$VALUE
+  val <- legend_df[legend_df$Class_Name==crop_name,]$Value
   
   #### This can be changed to gdal_calc later
   fun <- function(x) { x[x!=val] <- NA; return(x) }
@@ -313,15 +313,15 @@ generate_crop_status_raster <- function(crop_name,
   j <- 1
   #debug(reclassify_raster)
   
-  test_obj <- reclassify_raster(15,
-                       crop_status=crop_status_df,
-                       val=val,
-                       in_filename=file.path(out_dir,crop_out_filename),
-                       algorithm="GDAL",
-                       file_format=file_format,
-                       data_type= data_type,
-                       out_dir=out_dir,
-                       out_suffix=NULL)
+  #test_obj <- reclassify_raster(15,
+  #                     crop_status=crop_status_df,
+  #                     val=val,
+  #                     in_filename=file.path(out_dir,crop_out_filename),
+  #                     algorithm="GDAL",
+  #                     file_format=file_format,
+  #                     data_type= data_type,
+  #                     out_dir=out_dir,
+  #                     out_suffix=NULL)
   
   list_obj <- mclapply(1:52,
                        FUN=reclassify_raster,
@@ -337,8 +337,12 @@ generate_crop_status_raster <- function(crop_name,
                        mc.preschedule = FALSE)
    #browser()
 
+   ## in case no rows? should do try-error
+   inherits(list_obj)
+   
    rows_out_df <- lapply(list_obj,FUN=extract_outputs)
    out_df <- do.call(rbind,rows_out_df)
+   
    
    #View(out_df)
    
