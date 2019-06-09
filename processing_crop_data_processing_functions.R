@@ -323,41 +323,54 @@ generate_crop_status_raster <- function(crop_name,
   #                     out_dir=out_dir,
   #                     out_suffix=NULL)
   
-  list_obj <- mclapply(1:52,
-                       FUN=reclassify_raster,
-                       crop_status=crop_status_df,
-                       val=val,
-                       in_filename=file.path(out_dir,crop_out_filename),
-                       algorithm="GDAL",
-                       file_format=file_format,
-                       data_type=data_type,
-                       out_dir=out_dir,
-                       out_suffix=NULL,
-                       mc.cores = num_cores,
-                       mc.preschedule = FALSE)
-   #browser()
-
-   ## in case no rows? should do try-error
-   inherits(list_obj)
-   
-   rows_out_df <- lapply(list_obj,FUN=extract_outputs)
-   out_df <- do.call(rbind,rows_out_df)
-   
-   
-   #View(out_df)
-   
-   #Browse[2]> out_df$status <- rowSums(crop_df)
-   #Error in `$<-.data.frame`(`*tmp*`, status, value = c(0, 0, 0, 0, 0, 0,  : 
-   #                                                        replacement has 52 rows, data has 144
-   
-   n_col <- ncol(crop_status_df)
-   crop_df <- t(crop_status_df[,-c(1,2,3,n_col)])
-   out_df$status <- rowSums(crop_df)
-   
-   out_df$region <- region_name
-   out_df$crop_name <- crop_name
-   
-   out_df$val <- val #crop id in cropscale layer
+  if(nrow(crop_status_df)>0){
+    list_obj <- mclapply(1:52,
+                         FUN=reclassify_raster,
+                         crop_status=crop_status_df,
+                         val=val,
+                         in_filename=file.path(out_dir,crop_out_filename),
+                         algorithm="GDAL",
+                         file_format=file_format,
+                         data_type=data_type,
+                         out_dir=out_dir,
+                         out_suffix=NULL,
+                         mc.cores = num_cores,
+                         mc.preschedule = FALSE)
+    #browser()
+    
+    ## in case no rows? should do try-error
+    #inherits(list_obj)
+    
+    rows_out_df <- lapply(list_obj,FUN=extract_outputs)
+    out_df <- do.call(rbind,rows_out_df)
+    
+    #View(out_df)
+    
+    #Browse[2]> out_df$status <- rowSums(crop_df)
+    #Error in `$<-.data.frame`(`*tmp*`, status, value = c(0, 0, 0, 0, 0, 0,  : 
+    #                                                        replacement has 52 rows, data has 144
+    
+    n_col <- ncol(crop_status_df)
+    crop_df <- t(crop_status_df[,-c(1,2,3,n_col)])
+    out_df$status <- rowSums(crop_df)
+    
+    out_df$region <- region_name
+    out_df$crop_name <- crop_name
+    
+    out_df$val <- val #crop id in cropscale layer
+    
+  }else{
+    #"filename" "gdal_command" "status" "region" "crop_name" "val"
+    #"1" NA NA 0 "Iowa" "Tobacco" 11
+    #"2" NA NA 0 "Iowa" "Tobacco" 11
+    out_df  <- data.frame(filename=rep(NA,52),
+               gdal_command=rep(NA,52),
+               region=rep(region_name,52),
+               status=rep(NA,52),
+               crop_name=rep(crop_name,52),
+               val=rep(val,52)
+               )
+  }
    
    out_filename_df <- paste0("output_df_",region_name,"_",crop_name,"_",out_suffix,".txt")
    write.table(out_df,out_filename_df)
