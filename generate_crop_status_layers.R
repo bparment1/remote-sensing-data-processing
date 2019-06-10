@@ -108,7 +108,7 @@ load_obj <- function(f){
 
 #Benoit setup
 script_path <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts"
-crop_data_processing_functions <- "processing_crop_data_processing_functions_06052019b.R"
+crop_data_processing_functions <- "processing_crop_data_processing_functions_06102019.R"
 source(file.path(script_path,crop_data_processing_functions))
 
 ############################################################################
@@ -346,8 +346,9 @@ if(!is.null(crop_name)){
   crop_name <- legend_df_subset$Class_Name
   
   #undebug(generate_crop_status_raster)
-  # do test for tobaco!!
-  
+  # do test for tobaco!! (item 8)
+  # i <- 8
+  # i <- 11 (Alfalfa)
   test <- generate_crop_status_raster(crop_name[i],
                                       ref_rast_name_generated,
                                       region_name,
