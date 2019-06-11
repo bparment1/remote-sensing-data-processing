@@ -248,7 +248,7 @@ generate_crop_status_raster <- function(crop_name,
                                         out_suffix){
   #
   # CREATED: 10/22/2018
-  # MODIFIED: 06/05/2019
+  # MODIFIED: 06/10/2019
   # AUTHORS: Benoit Parmentier
   #
   # This function generates crop raster status for a given region (state).
@@ -312,6 +312,7 @@ generate_crop_status_raster <- function(crop_name,
   
   j <- 1
   #debug(reclassify_raster)
+  
   
   #test_obj <- reclassify_raster(15,
   #                     crop_status=crop_status_df,
