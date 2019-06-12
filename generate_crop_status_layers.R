@@ -196,6 +196,9 @@ if(create_out_dir_param==TRUE){
 #######################################
 ### PART 1: Read in DATA and crop to area of interest #######
 
+
+regions_sf <- st_read(file.path(in_dir,regions_infile),stringsAsFactors = F)
+
 ### Select the relevant region/tile to process us
 #df_tiles <- read.table(file.path(in_dir_var,infile_list_tiles),stringsAsFactors = F)
 #tile_file_name <- df_tiles[tile_index,] #region
@@ -212,7 +215,6 @@ state_val <- regions_sf$NAME[tile_index]
 
 region_name <- state_val
 #
-regions_sf <- st_read(file.path(in_dir,regions_infile),stringsAsFactors = F)
 
 
 #View(regions_sf)
