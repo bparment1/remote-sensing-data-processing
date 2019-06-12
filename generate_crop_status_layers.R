@@ -207,19 +207,22 @@ if(create_out_dir_param==TRUE){
 #(Alabama, Iowa, South Dakota, Nebraska, ) 
 # Submit a job array with index values of 1, 15, 18, 42
 #$ sbatch --array=1,3,5,7 
+#tile_index <- 1 #testing value
 state_val <- regions_sf$NAME[tile_index]
+
 region_name <- state_val
 #
 regions_sf <- st_read(file.path(in_dir,regions_infile),stringsAsFactors = F)
-plot(regions_sf$geometry)
+
+
 #View(regions_sf)
 ### This is where you crop the cropscape product:
 r_cropland <- raster(file.path(in_dir,in_filename_raster))
 #infile_reg_outline <- infile_reg_outline_Houston_city_limits
 #reg_sf <- st_read(infile_reg_outline)
 
-reg_sf <- st_transform(regions_sf,crs=projection(r_cropland))
-reg_sp <-as(reg_sf, "Spatial") 
+regions_sf <- st_transform(regions_sf,crs=projection(r_cropland))
+reg_sp <-as(regions_sf, "Spatial") 
 reg_sp <- reg_sp[reg_sp$NAME==region_name,]
 
 ref_rast_name_generated <- paste("ref_rast_crop_",region_name,"_",out_suffix,file_format,sep="")
@@ -232,6 +235,17 @@ ref_rast <- crop(r_cropland,
 #            file.path(out_dir,ref_rast_name_generated)
 #            )
 
+### Plot regions/tiles being processed:
+plot(regions_sf$geometry)
+#plot(r_NDVI_ts,y=1)
+#region_processed_sf
+plot(reg_sp,add=T,
+     border="red",
+     col=NA,
+     main=region_name)
+text(gCentroid(reg_sp),paste0("region ",tile_index, " processed"))
+#st_centroid(tile_sf)
+#text(st_centroid(tile_sf),paste0("tile ",tile_index, " processed"))
 
 #### end of crop in
 
