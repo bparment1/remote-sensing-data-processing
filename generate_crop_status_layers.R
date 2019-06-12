@@ -136,9 +136,10 @@ in_filename <- "Crop_Data_modified_AD4Benoit.csv" #updated names
 #in_filename_raster <- "cdl_alabama.tif" #this should be the general image for the whole US
 in_filename_raster <- "2016_30m_cdls.img"
 #ARGS 10
-state_val <- "Iowa" #if null should loop through?
-#state_val <- c("Alabama","South Dakota, "Nebraska,"Iowa") #should go on a node
+#state_val <- "Iowa" #if null should loop through? #job array
 
+#state_val <- c("Alabama","South Dakota, "Nebraska,"Iowa") #should go on a node
+state_val <- NULL # for array job set by array index
 #ARGS 11
 crop_name <- NULL #if NULL run for all crops in the given state(s)
 #crop_name <- "Cotton"
@@ -151,6 +152,19 @@ data_type <- "INT1U" #byte data (0,255)
 #in_filename_legend <- "CDL_2017_01.tif.vat.dbf"
 in_filename_legend <- "2016_30m_cdls.img.vat.dbf"
 
+#ARGS 11
+infile_list_tiles <- "list_tiles.txt"
+
+#ARGS 12: 
+#REGION/TILE INDEX this is from the array
+# Get the the array id value from the environment variable passed from sbatch
+
+SLURM_ARRAY_TASK_ID <- Sys.getenv('SLURM_ARRAY_TASK_ID')
+tile_index <- Sys.getenv("SLURM_ARRAY_TASK_ID") #this is should be an integer from 1:n, n is the number of tiles
+#slurm_arrayid <- Sys.getenv('SLURM_ARRAYID') #work with #SARRAY option in SLURM
+#tile_index <- as.numeric(slurm_arrayid) # coerce the value to an integer
+#tile_index <- 1  #for testing
+
 ################# START SCRIPT ###############################
 
 ######### PART 0: Set up the output dir ################
@@ -160,12 +174,15 @@ options(scipen=999)
 #set up the working directory
 #Create output directory
 
+
 if(is.null(out_dir)){
-  out_dir <- in_dir #output will be created in the input dir
+  out_dir <- dirname(in_dir) #output will be created in the input dir
   
 }
 
+#get tile ID and add it to the outsuffix name
 
+out_suffix <- paste("tile_",tile_index,"_",out_suffix,sep="")
 #out_dir <- in_dir #output will be created in the input dir
 
 out_suffix_s <- out_suffix #can modify name of output suffix
@@ -179,9 +196,21 @@ if(create_out_dir_param==TRUE){
 #######################################
 ### PART 1: Read in DATA and crop to area of interest #######
 
-region_name <- state_val
+### Select the relevant region/tile to process us
+#df_tiles <- read.table(file.path(in_dir_var,infile_list_tiles),stringsAsFactors = F)
+#tile_file_name <- df_tiles[tile_index,] #region
+#tile_spdf <- readOGR(dsn=in_dir_var,sub(".shp","",tile_file_name)) 
+#tile_sf <- st_read(file.path(in_dir_var,tile_file_name))
+#tile_spdf <- as(tile_sf, "Spatial")
+###
 
-regions_sf <- st_read(file.path(in_dir,regions_infile))
+#(Alabama, Iowa, South Dakota, Nebraska, ) 
+# Submit a job array with index values of 1, 15, 18, 42
+#$ sbatch --array=1,3,5,7 
+state_val <- regions_sf$NAME[tile_index]
+region_name <- state_val
+#
+regions_sf <- st_read(file.path(in_dir,regions_infile),stringsAsFactors = F)
 plot(regions_sf$geometry)
 #View(regions_sf)
 ### This is where you crop the cropscape product:
