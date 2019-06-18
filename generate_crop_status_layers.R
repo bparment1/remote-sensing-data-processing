@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 06/11/2019
+## DATE MODIFIED: 06/18/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -126,7 +126,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 6
-out_suffix <-"agbirds_processing_06112019" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_06182019" #output suffix for the files and ouptut folder
 #ARGS 7
 num_cores <- 2 # number of cores
 #ARGS 8
@@ -152,8 +152,8 @@ data_type <- "INT1U" #byte data (0,255)
 #in_filename_legend <- "CDL_2017_01.tif.vat.dbf"
 in_filename_legend <- "2016_30m_cdls.img.vat.dbf"
 
-#ARGS 11
-infile_list_tiles <- "list_tiles.txt"
+##ARGS 11
+#infile_list_tiles <- "list_tiles.txt"
 
 #ARGS 12: 
 #REGION/TILE INDEX this is from the array
@@ -161,6 +161,7 @@ infile_list_tiles <- "list_tiles.txt"
 
 SLURM_ARRAY_TASK_ID <- Sys.getenv('SLURM_ARRAY_TASK_ID')
 tile_index <- Sys.getenv("SLURM_ARRAY_TASK_ID") #this is should be an integer from 1:n, n is the number of tiles
+tile_index <- as.numeric(tile_index)
 #slurm_arrayid <- Sys.getenv('SLURM_ARRAYID') #work with #SARRAY option in SLURM
 #tile_index <- as.numeric(slurm_arrayid) # coerce the value to an integer
 #tile_index <- 1  #for testing
@@ -212,10 +213,8 @@ regions_sf <- st_read(file.path(in_dir,regions_infile),stringsAsFactors = F)
 #$ sbatch --array=1,3,5,7 
 #tile_index <- 1 #testing value
 state_val <- regions_sf$NAME[tile_index]
-
 region_name <- state_val
 #
-
 
 #View(regions_sf)
 ### This is where you crop the cropscape product:
@@ -224,8 +223,14 @@ r_cropland <- raster(file.path(in_dir,in_filename_raster))
 #reg_sf <- st_read(infile_reg_outline)
 
 regions_sf <- st_transform(regions_sf,crs=projection(r_cropland))
-reg_sp <-as(regions_sf, "Spatial") 
+reg_sp <-as(regions_sf, "Spatial")
+region_name
+tile_index
+state_val
+
+#plot(reg_sp)
 reg_sp <- reg_sp[reg_sp$NAME==region_name,]
+reg_sp$NAME
 
 ref_rast_name_generated <- paste("ref_rast_crop_",region_name,"_",out_suffix,file_format,sep="")
 
