@@ -3,7 +3,7 @@
 ## 
 ##
 ## DATE CREATED: 09/12/2018
-## DATE MODIFIED: 06/18/2019
+## DATE MODIFIED: 06/19/2019
 ## AUTHORS: Benoit Parmentier  
 ## Version: 2
 ## PROJECT: Agbirds
@@ -49,6 +49,11 @@
 
 #### Note that the current code may be run on the SESYNC HPC cluster by using the 11 input parameters. 
 #### The input must be set up to call from the shell and generate array job
+
+#(Alabama, Iowa, South Dakota, Nebraska, ) 
+# Submit a job array with index values of 1, 15, 18, 42
+#$ sbatch --array=1,3,5,7 
+#tile_index <- 1 #testing value
 
 ###################################################
 #
@@ -126,9 +131,9 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 6
-out_suffix <-"agbirds_processing_06182019" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_06192019" #output suffix for the files and ouptut folder
 #ARGS 7
-num_cores <- 2 # number of cores
+num_cores <- 4 # number of cores
 #ARGS 8
 #in_filename <- "Crop_Data_modified.csv"
 in_filename <- "Crop_Data_modified_AD4Benoit.csv" #updated names
@@ -137,8 +142,6 @@ in_filename <- "Crop_Data_modified_AD4Benoit.csv" #updated names
 in_filename_raster <- "2016_30m_cdls.img"
 #ARGS 10
 #state_val <- "Iowa" #if null should loop through? #job array
-
-#state_val <- c("Alabama","South Dakota, "Nebraska,"Iowa") #should go on a node
 state_val <- NULL # for array job set by array index
 #ARGS 11
 crop_name <- NULL #if NULL run for all crops in the given state(s)
@@ -161,9 +164,7 @@ in_filename_legend <- "2016_30m_cdls.img.vat.dbf"
 
 SLURM_ARRAY_TASK_ID <- Sys.getenv('SLURM_ARRAY_TASK_ID')
 tile_index <- Sys.getenv("SLURM_ARRAY_TASK_ID") #this is should be an integer from 1:n, n is the number of tiles
-tile_index <- as.numeric(tile_index)
-#slurm_arrayid <- Sys.getenv('SLURM_ARRAYID') #work with #SARRAY option in SLURM
-#tile_index <- as.numeric(slurm_arrayid) # coerce the value to an integer
+tile_index <- as.numeric(tile_index) #need to change data type
 #tile_index <- 1  #for testing
 
 ################# START SCRIPT ###############################
@@ -182,9 +183,7 @@ if(is.null(out_dir)){
 }
 
 #get tile ID and add it to the outsuffix name
-
 out_suffix <- paste("tile_",tile_index,"_",out_suffix,sep="")
-#out_dir <- in_dir #output will be created in the input dir
 
 out_suffix_s <- out_suffix #can modify name of output suffix
 if(create_out_dir_param==TRUE){
@@ -199,60 +198,50 @@ if(create_out_dir_param==TRUE){
 
 
 regions_sf <- st_read(file.path(in_dir,regions_infile),stringsAsFactors = F)
-
-### Select the relevant region/tile to process us
-#df_tiles <- read.table(file.path(in_dir_var,infile_list_tiles),stringsAsFactors = F)
-#tile_file_name <- df_tiles[tile_index,] #region
-#tile_spdf <- readOGR(dsn=in_dir_var,sub(".shp","",tile_file_name)) 
-#tile_sf <- st_read(file.path(in_dir_var,tile_file_name))
-#tile_spdf <- as(tile_sf, "Spatial")
-###
-
-#(Alabama, Iowa, South Dakota, Nebraska, ) 
-# Submit a job array with index values of 1, 15, 18, 42
-#$ sbatch --array=1,3,5,7 
-#tile_index <- 1 #testing value
 state_val <- regions_sf$NAME[tile_index]
 region_name <- state_val
-#
 
-#View(regions_sf)
 ### This is where you crop the cropscape product:
 r_cropland <- raster(file.path(in_dir,in_filename_raster))
-#infile_reg_outline <- infile_reg_outline_Houston_city_limits
-#reg_sf <- st_read(infile_reg_outline)
 
 regions_sf <- st_transform(regions_sf,crs=projection(r_cropland))
 reg_sp <-as(regions_sf, "Spatial")
+
+## printing for debugging
 region_name
 tile_index
 state_val
 
-#plot(reg_sp)
+
 reg_sp <- reg_sp[reg_sp$NAME==region_name,]
 reg_sp$NAME
-
 ref_rast_name_generated <- paste("ref_rast_crop_",region_name,"_",out_suffix,file_format,sep="")
 
 ref_rast <- crop(r_cropland,
                  reg_sp,
                  filename=file.path(out_dir,ref_rast_name_generated),
                  overwrite=T)  
-#writeRaster(ref_rast,
-#            file.path(out_dir,ref_rast_name_generated)
-#            )
 
 ### Plot regions/tiles being processed:
-plot(regions_sf$geometry)
+##Figure 1: wwf ecoregion
+res_pix<-960
+col_mfrow<-1
+row_mfrow<-1
+
+fig_filename <- paste("Figure_",region_name,"_",out_suffix,".png",sep="") 
+
+png(filename=fig_filename,
+    width=col_mfrow*res_pix,height=row_mfrow*res_pix)
+
+plot(regions_sf$geometry,
+     main=paste0("Processing ",region_name, " tile ", tile_index))
 #plot(r_NDVI_ts,y=1)
 #region_processed_sf
 plot(reg_sp,add=T,
      border="red",
-     col=NA,
-     main=region_name)
+     col=NA)
 text(gCentroid(reg_sp),paste0("region ",tile_index, " processed"))
-#st_centroid(tile_sf)
-#text(st_centroid(tile_sf),paste0("tile ",tile_index, " processed"))
+dev.off()
 
 #### end of crop in
 
@@ -377,7 +366,6 @@ unique(data_screened_df$Crop) #about 16 crops
 ### will need to match the names of crop in the legend to the names in the dataset created by the workshop!
 
 common_crop_list <- intersect(unique(data_screened_df$Crop),unique(legend_df$Class_Name))
-
 legend_df_subset <- subset(legend_df,Class_Name%in% common_crop_list)
 
 ###############################################
@@ -408,17 +396,19 @@ if(!is.null(crop_name)){
   # do test for tobaco!! (item 8)
   # i <- 8
   # i <- 11 (Alfalfa)
-  #test <- generate_crop_status_raster(crop_name[i],
-  #                                    ref_rast_name_generated,
-  #                                    region_name,
-  #                                    data_screened_df,
-  #                                    legend_df=legend_df_subset,
-  #                                    algorithm,
-  #                                    num_cores,#set the cores here,
-  #                                    data_type=data_type,
-  #                                    file_format, 
-  #                                    out_dir,
-  #                                    out_suffix)
+  #undebug(generate_crop_status_raster)
+  
+  test <- generate_crop_status_raster(crop_name[i],
+                                      ref_rast_name_generated,
+                                      region_name,
+                                      data_screened_df,
+                                      legend_df=legend_df_subset,
+                                      algorithm,
+                                      num_cores,#set the cores here,
+                                      data_type=data_type,
+                                      file_format, 
+                                      out_dir,
+                                      out_suffix)
 
   list_out_df <- mclapply(crop_name,
                         FUN=generate_crop_status_raster,
@@ -471,9 +461,9 @@ list_out_filename <- paste0(crop_name[error_list],"_",region_name,file_format)
 list_infile_names <- unlist(lapply(list_infile_names,function(x){list_files_vector <- paste(x,collapse = " ")}))
 list_band_names <- unlist(lapply(list_band_names,function(x){list_files_vector <- paste(x,collapse = " ")}))
 
-out_filename <- "Cotton_test.tif"
-band_names <- (basename(infile_names))
-band_names <- gsub(extension(band_names),"",band_names)
+#out_filename <- "Cotton_test.tif"
+#band_names <- (basename(infile_names))
+#band_names <- gsub(extension(band_names),"",band_names)
 python_bin <- "/nfs/bparmentier-data/Data/projects/agbirds-data/scripts/set_band_descriptions.py"
 
 ### Need to change data type from Float32 to byte!!!
@@ -493,11 +483,11 @@ data_inputs_df$infile_name <- as.character(data_inputs_df$infile_name)
 
 
 #debug(generate_multiband)
-i<-2
-test_out <- generate_multiband(infile_names = data_inputs_df$infile_name[i], 
-                               band_names = data_inputs_df$band_names[i], 
-                               out_filename = data_inputs_df$out_filename[i],
-                               python_bin=data_inputs_df$python_bin[i])
+#i<-2
+#test_out <- generate_multiband(infile_names = data_inputs_df$infile_name[i], 
+#                               band_names = data_inputs_df$band_names[i], 
+#                               out_filename = data_inputs_df$out_filename[i],
+#                               python_bin=data_inputs_df$python_bin[i])
 
 
 #r_brick <- brick(test_out$out_filename)
@@ -508,7 +498,7 @@ list_merged_crop_files <- mcmapply(generate_multiband,
                                    band_names = data_inputs_df$band_names, 
                                    out_filename = data_inputs_df$out_filename,
                                    python_bin = data_inputs_df$python_bin,
-                                   mc.cores = 3,
+                                   mc.cores = num_cores,
                                    mc.preschedule = FALSE)
 
 
