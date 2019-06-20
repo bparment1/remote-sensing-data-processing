@@ -131,7 +131,7 @@ file_format <- ".tif"
 #ARGS 5:
 create_out_dir_param=TRUE #create a new ouput dir if TRUE
 #ARGS 6
-out_suffix <-"agbirds_processing_06192019" #output suffix for the files and ouptut folder
+out_suffix <-"agbirds_processing_06202019" #output suffix for the files and ouptut folder
 #ARGS 7
 num_cores <- 4 # number of cores
 #ARGS 8
@@ -371,6 +371,7 @@ legend_df_subset <- subset(legend_df,Class_Name%in% common_crop_list)
 ###############################################
 ########### PART 4: Now generate raster crop status
 
+print(paste0("Starting part 4, generating raster crop status for ",region_name))
 
 if(!is.null(crop_name)){
   
@@ -446,6 +447,8 @@ out_df <- list_out_df[[1]]
 ###############################################
 ########### PART 5: Mutliband merging of bands and adding description
 
+print("Starting part 5, multiband merging")
+
 ## add function:
 infile_names <- as.character(na.omit(list_out_df[[2]]$filename))
 #list_infile_names <- lapply(list_out_df,FUN=function(x){x$filename})
@@ -501,5 +504,6 @@ list_merged_crop_files <- mcmapply(generate_multiband,
                                    mc.cores = num_cores,
                                    mc.preschedule = FALSE)
 
+print("Generated merged file, ending script now")
 
 #####################  End of script ###############################
